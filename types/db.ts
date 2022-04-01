@@ -1,3 +1,5 @@
+import { MerchantData } from './data';
+
 import { SessionProps } from './index';
 
 export interface StoreData {
@@ -16,6 +18,8 @@ export interface Db {
     setUser(session: SessionProps): Promise<void>;
     setStore(session: SessionProps): Promise<void>;
     setStoreUser(session: SessionProps): Promise<void>;
+    setMerchant(storeHash: string, merchantData: MerchantData): Promise<void>;
+    getMerchant(context: string): Promise<void>;
     getStore(): StoreData | null;
     getStoreToken(storeId: string): string | null;
     deleteStore(session: SessionProps): Promise<void>;

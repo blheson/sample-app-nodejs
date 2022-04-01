@@ -1,12 +1,6 @@
 import { Button, Flex, Form, FormGroup, Input, Select, Textarea } from '@bigcommerce/big-design';
 import { ChangeEvent, FormEvent, useState } from 'react';
 
-// import { MoreHorizIcon } from '@bigcommerce/big-design-icons';
-// import Link from 'next/link';
-// import { ReactElement, useState } from 'react';
-// import ErrorMessage from '../../components/error';
-// import Loading from '../../components/loading';
-
 import { MerchantData, StringKeyValue } from '../types';
 interface FormProps {
     formData: MerchantData;
@@ -21,23 +15,19 @@ const MerchantForm = ({ formData, onSubmit }: FormProps) => {
 
     const [form, setForm] = useState<MerchantData>({ environment, password, email, merchant_id, public_key });
     const [errors, setErrors] = useState<StringKeyValue>({});
- 
-    // const router = useRouter();
-    // const { error, isLoading, list = [], meta = {} } = useProductList({
-    //   page: String(currentPage),
-    //   limit: String(itemsPerPage),
-    //   ...(columnHash && { sort: columnHash }),
-    //   ...(columnHash && { direction: direction.toLowerCase() }),
-    // });
+
+
     const handleSubmit = (event: FormEvent<EventTarget>) => {
         event.preventDefault();
 
         // If there are errors, do not submit the form
         const hasErrors = Object.keys(errors).length > 0;
+
         if (hasErrors) return;
 
         onSubmit(form);
     };
+
     const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name: formName, value } = event?.target;
         setForm(prevForm => ({ ...prevForm, [formName]: value }));
@@ -54,8 +44,6 @@ const MerchantForm = ({ formData, onSubmit }: FormProps) => {
 
     return (
         <>
-
-
             <Form onSubmit={handleSubmit} >
                 <FormGroup>
                     <Input
@@ -65,15 +53,11 @@ const MerchantForm = ({ formData, onSubmit }: FormProps) => {
                         name="email"
                         onChange={handleChange}
                         value={form.email}
-
-
                         placeholder="Email address"
                         required
                     />
-
                 </FormGroup>
                 <FormGroup>
-
                     <Input
                         label="Password"
                         type="password"
@@ -107,7 +91,7 @@ const MerchantForm = ({ formData, onSubmit }: FormProps) => {
 
                     <Textarea
                         label="Public Key"
-                        
+
                         name="public_key"
                         error={errors?.public_key}
                         rows={3}

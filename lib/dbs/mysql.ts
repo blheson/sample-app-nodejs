@@ -1,6 +1,6 @@
 import * as mysql from 'mysql';
 import { promisify } from 'util';
-import { SessionProps, StoreData } from '../../types';
+import { MerchantData,SessionProps, StoreData  } from '../../types';
 
 const MYSQL_CONFIG = {
     host: process.env.MYSQL_HOST,
@@ -90,4 +90,31 @@ export async function getStoreToken(storeHash: string) {
 
 export async function deleteStore({ store_hash: storeHash }: SessionProps) {
     await query('DELETE FROM stores WHERE storeHash = ?', storeHash);
+}
+
+export async function getMerchant(storeHash: string) {
+ 
+    
+    const sql = 'SELECT * FROM merchants WHERE storeHash = ?';
+    const merchant = await query(sql, storeHash);
+
+    return merchant;
+
+}
+export async function setMerchant(storeHash: string, data: MerchantData) {
+
+    const { password, public_key, email, merchant_id, environment } = data;
+    console.warn("context", storeHash, data);
+
+
+    const sql = 'SELECT * FROM merchants WHERE storeHash = ?';
+    const merchant = await query(sql, storeHash);
+    const merchantData: MerchantData = { password, public_key, email, merchant_id, environment };
+    // Create a new admin user if none exists
+    if (!merchant.length) {
+        await query('INSERT INTO merchants SET ?', merchantData);
+    } else {
+        await query('UPDATE merchants SET email=?,environment=?,merchant_id=?, password=?, public_key=? WHERE storeHash = ?', [email, environment, merchant_id, password, public_key, storeHash]);
+    }
+
 }
