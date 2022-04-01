@@ -4,8 +4,11 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { ReactElement, useState } from 'react';
 import ErrorMessage from '../../components/error';
+
 import Loading from '../../components/loading';
+ 
 import { useProductList } from '../../lib/hooks';
+
 import { TableItem } from '../../types';
 
 const Products = () => {
@@ -89,6 +92,7 @@ const Products = () => {
                 }}
                 stickyHeader
             />
+          
         </Panel>
     );
 };
