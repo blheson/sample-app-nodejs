@@ -95,7 +95,8 @@ export async function deleteStore({ store_hash: storeHash }: SessionProps) {
 export async function getMerchant(storeHash: string) {
  
     
-    const sql = 'SELECT * FROM merchants WHERE storeHash = ?';
+    const sql = 'SELECT * FROM merchants WHERE store_hash = ?';
+    console.warn('Sql query', sql,storeHash);
     const merchant = await query(sql, storeHash);
 
     return merchant;
@@ -112,9 +113,9 @@ export async function setMerchant(storeHash: string, data: MerchantData) {
     const merchantData: MerchantData = { password, public_key, email, merchant_id, environment };
     // Create a new admin user if none exists
     if (!merchant.length) {
-        await query('INSERT INTO merchants SET ?', merchantData);
+        await query('INSERT INTO merchants SET ?', {...merchantData,...{store_hash:storeHash}});
     } else {
-        await query('UPDATE merchants SET email=?,environment=?,merchant_id=?, password=?, public_key=? WHERE storeHash = ?', [email, environment, merchant_id, password, public_key, storeHash]);
+        await query('UPDATE merchants SET email=?,environment=?,merchant_id=?, password=?, public_key=? WHERE store_hash = ?', [email, environment, merchant_id, password, public_key, storeHash]);
     }
 
 }

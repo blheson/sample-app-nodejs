@@ -1,37 +1,39 @@
-import { Box, Flex, H1, H4, Panel } from '@bigcommerce/big-design';
-import styled from 'styled-components';
+
 import ErrorMessage from '../components/error';
-import Loading from '../components/loading';
-import { useProducts } from '../lib/hooks';
+import MerchantForm from '../components/merchantForm';
+import { useSession } from '../context/session';
+import { useUser } from '../lib/hooks';
+import { MerchantData } from "../types/data";
 
 const Index = () => {
-    const { error, isLoading, summary } = useProducts();
+    const {
+        merchantData,
+        error
+    } = useUser();
 
-    if (isLoading) return <Loading />;
+    const encodedContext = useSession()?.context;
+
+    const formData = { environment: '', password: '', email: '', merchant_id: '', public_key: '' };
+
+    const newData  = {...formData,...merchantData};
+    const handleSubmit = async (data: MerchantData) => {
+        console.warn(data);
+     
+        // Update product details
+        const response=await fetch(`/api/merchant?context=${encodedContext}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        });
+        const result = await response.json();
+        console.warn(result)
+
+        return false;
+    }
+    // if (isLoading) return <Loading />;
     if (error) return <ErrorMessage error={error} />;
 
-    return (
-        <Panel header="Homepage">
-            <Flex>
-                <StyledBox border="box" borderRadius="normal" marginRight="xLarge" padding="medium">
-                    <H4>Inventory count</H4>
-                    <H1 marginBottom="none">{summary.inventory_count}</H1>
-                </StyledBox>
-                <StyledBox border="box" borderRadius="normal" marginRight="xLarge" padding="medium">
-                    <H4>Variant count</H4>
-                    <H1 marginBottom="none">{summary.variant_count}</H1>
-                </StyledBox>
-                <StyledBox border="box" borderRadius="normal" padding="medium">
-                    <H4>Primary category</H4>
-                    <H1 marginBottom="none">{summary.primary_category_name}</H1>
-                </StyledBox>
-            </Flex>
-        </Panel>
-    );
+    return (<MerchantForm formData={newData} onSubmit={handleSubmit} />);
 };
-
-const StyledBox = styled(Box)`
-    min-width: 10rem;
-`;
 
 export default Index;
