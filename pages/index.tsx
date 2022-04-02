@@ -1,31 +1,38 @@
-
+import { AlertProps } from '@bigcommerce/big-design';
 import ErrorMessage from '../components/error';
 import MerchantForm from '../components/merchantForm';
 import { useSession } from '../context/session';
 import { useUser } from '../lib/hooks';
 import { MerchantData } from "../types/data";
+import { alertsManager } from './_app';
+
+
 
 const Index = () => {
+
     const {
-        merchantData,
+        merchantData = [],
         error
     } = useUser();
-    
-    let newData;
+
 
     const encodedContext = useSession()?.context;
 
-    const formData = { environment: '', password: '', email: '', merchant_id: '', public_key: '' };
+    const formData = { environment: '', password: '', email: '', merchantId: '', publicKey: '' };
+    let newData;
+    if (merchantData.length > 0) {
+        const theData = merchantData[0];
 
-    if (merchantData) {
-        newData = { ...formData, ...merchantData };
+        delete theData.createdAt
+        delete theData.updatedAt
+        newData = { ...formData, ...theData };
+
     } else {
         newData = formData;
     }
 
 
     const handleSubmit = async (data: MerchantData) => {
-        console.warn({ data });
 
         // Update product details
         const response = await fetch(`/api/merchant?context=${encodedContext}`, {
@@ -34,9 +41,23 @@ const Index = () => {
             body: JSON.stringify(data),
         });
         const result = await response.json();
-        console.warn({ result })
+        if (result.merchantData.affectedRows === 1) {
+            const alert = {
+                // header: 'Optional Headline',
+                messages: [
+                    {
+                        text: 'Details saved'
+                    },
+                ],
+                type: 'success',
+                onClose: () => null,
+            } as AlertProps;
 
-        return false;
+
+            alertsManager.add(alert);
+        }
+
+        return result;
     }
     // if (isLoading) return <Loading />;
     if (error) return <ErrorMessage error={error} />;

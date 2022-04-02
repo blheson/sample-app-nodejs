@@ -96,7 +96,7 @@ export async function getMerchant(storeHash: string) {
  
     
     const sql = 'SELECT * FROM merchants WHERE storeHash = ?';
-    console.warn('Sql query', sql,storeHash);
+
     const merchant = await query(sql, storeHash);
 
     return merchant;
@@ -105,7 +105,6 @@ export async function getMerchant(storeHash: string) {
 export async function setMerchant(storeHash: string, data: MerchantData) {
 
     const { password, publicKey, email, merchantId, environment } = data;
-    console.warn("context", storeHash, data);
 
 
     const sql = 'SELECT * FROM merchants WHERE storeHash = ?';

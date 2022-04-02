@@ -17,8 +17,7 @@ const Merchant = () => {
 
     const newData  = {...formData,...merchantData};
     const handleSubmit = async (data: MerchantData) => {
-        console.warn(data);
-     
+  
         // Update product details
         const response=await fetch(`/api/merchant?context=${encodedContext}`, {
             method: 'POST',
@@ -26,9 +25,8 @@ const Merchant = () => {
             body: JSON.stringify(data),
         });
         const result = await response.json();
-        console.warn(result)
-
-        return false;
+   
+        return result;
     }
     // if (isLoading) return <Loading />;
     if (error) return <ErrorMessage error={error} />;

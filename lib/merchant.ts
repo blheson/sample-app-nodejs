@@ -27,7 +27,9 @@ export async function getMerchantData({ query: { context = '' } }: NextApiReques
 
     }
 
-    return await db.getMerchant(storeHash);
+    const data =  await db.getMerchant(storeHash);
+    
+    return data;
 }
 
 

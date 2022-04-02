@@ -95,14 +95,13 @@ export const useShippingAndProductsInfo = (orderId: number) => {
 export  function useUser(query?: QueryParams) {
     const { context } = useSession();
     // const context  = "useSession()";
-    console.warn(context,"The context from use usef");
+  
     const params = new URLSearchParams({ ...query, context }).toString();
 
 
     // Use an array to send multiple arguments to fetcher
     const { data, error } = useSWR(context ? ['/api/merchant', params] : null, fetcher);
-    console.warn(data,"The data from use User");
-
+ 
     return {
         merchantData:data,
         isLoading: !data && !error,

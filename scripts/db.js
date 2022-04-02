@@ -2,10 +2,10 @@ const mysql = require('mysql');
 const util = require('util');
 
 const MYSQL_CONFIG = {
-    host: process.env.MYSQL_HOST,
-    database: process.env.MYSQL_DATABASE,
-    user: process.env.MYSQL_USERNAME,
-    password: process.env.MYSQL_PASSWORD,
+    host: process.env.MYSQL_HOST || 'localhost',
+    database: process.env.MYSQL_DATABASE || 'rkfl-bigcommerce',
+    user: process.env.MYSQL_USERNAME || 'root',
+    ...(process.env.MYSQL_PASSWORD && { password: process.env.MYSQL_PASSWORD }),
     ...(process.env.MYSQL_PORT && { port: process.env.MYSQL_PORT }),
 };
 
@@ -42,6 +42,18 @@ const storeUsersCreate = query('CREATE TABLE `storeUsers` (\n' +
     ') ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;\n'
 );
 
-Promise.all([usersCreate, storesCreate]).then(() => {
+const merchantCreate = query('CREATE TABLE `merchants` (\n' +
+    '  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,\n' +
+    '  `email` varchar(100) NOT NULL,\n' +
+    '  `environment` varchar(10) NOT NULL,\n' +
+    '  `merchantId` varchar(20) NOT NULL,\n' +
+    '  `password` varchar(200) NOT NULL,\n' +
+    '   `publicKey` text NOT NULL,\n' +
+    '  `storeHash` varchar(10) NOT NULL,\n' +
+    '  PRIMARY KEY (`id`),\n' +
+    '  UNIQUE KEY `storeHash` (`storeHash`)\n' +
+    ') ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;\n'
+);
+Promise.all([usersCreate, storesCreate,storeUsersCreate,merchantCreate]).then(() => {
     connection.end();
 });

@@ -1,0 +1,12 @@
+sessionsession {
+  access_token: 'dzxqec00purs841u25xi8o0vf67xg4f',
+  scope: 'store_cart store_checkout store_payments_access_token_create store_payments_methods_read store_v2_customers_read_only
+store_v2_default store_v2_orders store_v2_products store_v2_transactions users_basic_information',
+  user: {
+    id: 2270757,
+    username: 'reachme@blessingudor.com',
+    email: 'reachme@blessingudor.com'
+  },
+  context: 'stores/xsv4d769d2',
+  account_uuid: '8e26272c-8730-4500-a535-67f5c470a897'
+}
