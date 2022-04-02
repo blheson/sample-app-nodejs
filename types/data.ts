@@ -6,11 +6,11 @@ export interface FormData {
     type: string;
 }
 export interface MerchantData {
-    public_key: string;
+    publicKey: string;
     environment: string;
     password: string;
     email: string;
-    merchant_id: string;
+    merchantId: string;
 }
 export interface TableItem {
     id: number;

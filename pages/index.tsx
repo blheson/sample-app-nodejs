@@ -10,23 +10,31 @@ const Index = () => {
         merchantData,
         error
     } = useUser();
+    
+    let newData;
 
     const encodedContext = useSession()?.context;
 
     const formData = { environment: '', password: '', email: '', merchant_id: '', public_key: '' };
 
-    const newData  = {...formData,...merchantData};
+    if (merchantData) {
+        newData = { ...formData, ...merchantData };
+    } else {
+        newData = formData;
+    }
+
+
     const handleSubmit = async (data: MerchantData) => {
-        console.warn(data);
-     
+        console.warn({ data });
+
         // Update product details
-        const response=await fetch(`/api/merchant?context=${encodedContext}`, {
+        const response = await fetch(`/api/merchant?context=${encodedContext}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data),
         });
         const result = await response.json();
-        console.warn(result)
+        console.warn({ result })
 
         return false;
     }

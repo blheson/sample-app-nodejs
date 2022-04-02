@@ -7,10 +7,11 @@ import db from './db';
 
 
 
-export function setMerchantData({ query: { context = '' } }, data: MerchantData) {
+export async function setMerchantData({ query: { context = '' } }, data: MerchantData) {
     if (typeof context !== 'string') return;
     const { context: storeHash } = decodePayload(context);
-    db.setMerchant(storeHash, data);
+
+    return await db.setMerchant(storeHash, data);
 
 }
 

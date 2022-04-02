@@ -11,9 +11,9 @@ const FormErrors = {
     price: 'Default price is required',
 };
 const MerchantForm = ({ formData, onSubmit }: FormProps) => {
-    const { environment, password, email, merchant_id, public_key } = formData;
+    const { environment, password, email, merchantId, publicKey } = formData;
 
-    const [form, setForm] = useState<MerchantData>({ environment, password, email, merchant_id, public_key });
+    const [form, setForm] = useState<MerchantData>({ environment, password, email, merchantId, publicKey });
     const [errors, setErrors] = useState<StringKeyValue>({});
 
 
@@ -77,10 +77,10 @@ const MerchantForm = ({ formData, onSubmit }: FormProps) => {
                     <Input
                         label="Merchant ID"
                         type="text"
-                        name="merchant_id"
-                        error={errors?.merchant_id}
+                        name="merchantId"
+                        error={errors?.merchantId}
 
-                        value={form.merchant_id}
+                        value={form.merchantId}
                         onChange={handleChange}
 
                         placeholder="eyyh-euuej-ee"
@@ -92,11 +92,11 @@ const MerchantForm = ({ formData, onSubmit }: FormProps) => {
                     <Textarea
                         label="Public Key"
 
-                        name="public_key"
-                        error={errors?.public_key}
+                        name="publicKey"
+                        error={errors?.publicKey}
                         rows={3}
                         resize={true}
-                        value={form.public_key}
+                        value={form.publicKey}
                         onChange={handleChange}
                         description="Public Key."
                         placeholder="Public Key..."
