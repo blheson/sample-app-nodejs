@@ -12,6 +12,14 @@ export interface MerchantData {
     email: string;
     merchantId: string;
 }
+export interface RKFLPayload {
+    amount: string,
+    currency: string,
+    orderId: string,
+    cart: [],
+    storeHash: string,
+    redirectUrl: string
+}
 export interface TableItem {
     id: number;
     name: string;
