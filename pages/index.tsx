@@ -9,7 +9,6 @@ import { alertsManager } from './_app';
 
 
 const Index = () => {
-
     const {
         merchantData = [],
         error

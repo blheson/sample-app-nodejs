@@ -1,14 +1,14 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 // import { getSession } from '../../../lib/auth';
 import { getMerchantData, setMerchantData, } from '../../../lib/merchant';
-
+ 
 export default async function merchant(req: NextApiRequest, res: NextApiResponse) {
 
     const {
         body,
         method,
     } = req;
-
+ 
     switch (method) {
         case 'GET':
             try {

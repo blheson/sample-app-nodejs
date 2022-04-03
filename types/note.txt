@@ -10,3 +10,6 @@ store_v2_default store_v2_orders store_v2_products store_v2_transactions users_b
   context: 'stores/xsv4d769d2',
   account_uuid: '8e26272c-8730-4500-a535-67f5c470a897'
 }
+
+
+https://developer.bigcommerce.com/docs/ZG9jOjIyMDYyMg-scripts#notesonly stencil tehem

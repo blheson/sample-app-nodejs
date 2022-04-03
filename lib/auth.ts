@@ -4,7 +4,7 @@ import * as BigCommerce from 'node-bigcommerce';
 import { ApiConfig, QueryParams, SessionContextProps, SessionProps } from '../types';
 import db from './db';
 
-const { API_URL, AUTH_CALLBACK, CLIENT_ID, CLIENT_SECRET, JWT_KEY, LOGIN_URL } = process.env;
+const { API_URL, APP_URL, AUTH_CALLBACK, CLIENT_ID, CLIENT_SECRET, JWT_KEY, LOGIN_URL,RKFL_SDK, SCRIPT_CHECKOUT } = process.env;
 
 // Used for internal configuration; 3rd party apps may remove
 const apiConfig: ApiConfig = {};
@@ -30,6 +30,10 @@ const bigcommerceSigned = new BigCommerce({
     secret: CLIENT_SECRET,
     responseType: 'json',
 });
+
+export const appURL = APP_URL;
+export const checkoutScript = SCRIPT_CHECKOUT;
+export const rkflSdkScript = RKFL_SDK;
 
 export function bigcommerceClient(accessToken: string, storeHash: string, apiVersion = 'v3') {
     return new BigCommerce({

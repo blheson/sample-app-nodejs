@@ -88,7 +88,12 @@ export async function getStoreToken(storeHash: string) {
     return results.length ? results[0].accessToken : null;
 }
 
-export async function deleteStore({ store_hash: storeHash }: SessionProps) {
+export async function deleteStore({sub,context}: SessionProps) {
+    const contextString = context ?? sub;
+    const storeHash = contextString?.split('/')[1] || '';
+    
+   
+ 
     await query('DELETE FROM stores WHERE storeHash = ?', storeHash);
 }
 
