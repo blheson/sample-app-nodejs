@@ -41,18 +41,23 @@ export default async function auth(req: NextApiRequest, res: NextApiResponse) {
                 "api_client_id": "",
                 "consent_category": "essential",
                 "enabled": true,
-                "channel_id": 2
+                "channel_id": 1
             }
 
-            const request1 = bigcommerce.post('/content/scripts',payload1);
+            const request1 = await bigcommerce.post('/content/scripts',payload1);
 
-            const request2 = bigcommerce.post('/content/scripts', payload2);
+            const request2 = await bigcommerce.post('/content/scripts', payload2);
+            console.warn('Install complete',request2,request1);
 
-            Promise.all([request1, request2]).then(() => {
+        //    Promise.all([request2,request1]).then((res) => {
+        //     // Promise.all([request1, request2]).then((res) => {
 
-                console.warn('Install complete');
+        //         console.warn('Install complete',res);
 
-            });
+        //     }).catch(e=>{
+        //         console.error('Install not complete',e.message);
+
+        //     });
 
         } catch (error) {
 
