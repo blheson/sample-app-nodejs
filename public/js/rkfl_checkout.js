@@ -77,7 +77,7 @@
         getUserData: function () {
 
 
-            let email = RocketfuelPaymentEngine.user_data.email || validateEmail(document.querySelector('.customerView-body.optimizedCheckout-contentPrimary').innerText) ? document.querySelector('.customerView-body.optimizedCheckout-contentPrimary').innerText : null;
+            let email = RocketfuelPaymentEngine.user_data.email || document.querySelector('.customerView-body.optimizedCheckout-contentPrimary')?.innerText || null;
 
             let user_data = {
                 firstName: document.querySelector('.first-name')?.innerText || null,
@@ -152,6 +152,7 @@
 
             //show retrigger button
             document.getElementById('rocketfuel_payment').disabled = false;
+            document.getElementById('checkout-payment-continue').disabled = false
 
 
         },
