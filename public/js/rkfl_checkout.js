@@ -66,11 +66,11 @@
         getUserData: function () {
 
 
-            let email = RocketfuelPaymentEngine.user_data.email || validateEmail(document.querySelector('.customerView-body.optimizedCheckout-contentPrimary').value) ? document.querySelector('.customerView-body.optimizedCheckout-contentPrimary').value : null;
+            let email = RocketfuelPaymentEngine.user_data.email || validateEmail(document.querySelector('.customerView-body.optimizedCheckout-contentPrimary').innerText) ? document.querySelector('.customerView-body.optimizedCheckout-contentPrimary').innerText : null;
 
             let user_data = {
-                first_name: document.querySelector('.first-name')?.value || null,
-                last_name: document.querySelector('.family-name')?.value || null,
+                first_name: document.querySelector('.first-name')?.innerText || null,
+                last_name: document.querySelector('.family-name')?.innerText || null,
                 email,
                 merchant_auth: 'TNc/qaLPSX+al57l7jKkmKz2nPNzJXowAK0AlBwFNTLXdjh0OD74SyqhOTXlM+JA3O1LsxgH0Jm+Z9Rs5nulVI5uGveycWbPsBj912bv8tbuFTUJlgDGZk9mxnZ4lZWNKCusFxuILRJ9qMjJSFB16AeFkI1hVVvEH3tfnEDdx5bcZFDFyEGD1F0P/Lwg0Vvo4gKqKfbaptH5pgX35iXomXC8HvTQyDVIZWi4wa52PYZr0Ws0Jgb7NcNSqHmoviQr8889SOrsWMjeu7YsDpPFEsgx+Knox5+IfFfj1OwpqflzxShtKvepjCxFfnBoV09BP230h/+/zmTkhs7yaTytew=='
             }
@@ -443,6 +443,7 @@
                 console.log('Checking for ')
 
                 if (document.querySelector('.form-checklist.optimizedCheckout-form-checklist')) {
+                    console.log('Interval has been cleared for ')
 
                     clearInterval(formChecklist);
 
@@ -464,4 +465,5 @@
 
 
     // r9f8hq4vqa
+    // r9f8hq4vqa.
 })();
