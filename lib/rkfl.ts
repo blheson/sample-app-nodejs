@@ -33,12 +33,15 @@ async function getMerchantData(storeHash): Promise<MerchantData> {
 
 }
 async function login(environment: string, { email, password }: MerchantData): Promise<{ access: string }> {
+    const raw = { email, password };
 
     const response = await fetch(environment + '/auth/login', {
         method: "POST",
-        body: JSON.stringify({ email: email, password })
+        body: JSON.stringify(raw)
     })
     const result = await response.json();
+
+    console.warn(result,raw,environment + '/auth/login');
 
     return { access: result.result.access };
 

@@ -46,7 +46,7 @@ const merchantCreate = query('CREATE TABLE `merchants` (\n' +
     '  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,\n' +
     '  `email` varchar(100) NOT NULL,\n' +
     '  `environment` varchar(10) NOT NULL,\n' +
-    '  `merchantId` varchar(20) NOT NULL,\n' +
+    '  `merchantId` varchar(50) NOT NULL,\n' +
     '  `password` varchar(200) NOT NULL,\n' +
     '   `publicKey` text NOT NULL,\n' +
     '  `storeHash` varchar(10) NOT NULL,\n' +

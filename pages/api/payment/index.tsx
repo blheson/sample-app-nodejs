@@ -1,7 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 
-import { getSession } from '../../../lib/auth';
-
 import { getUUID } from '../../../lib/rkfl';
 
 export default async function merchant(req: NextApiRequest, res: NextApiResponse) {
@@ -14,15 +12,19 @@ export default async function merchant(req: NextApiRequest, res: NextApiResponse
     switch (method) {
         case 'GET':
             try {
+                if (!body.amount || !body.currency || !body.cart || !body.storeHash) {
+                    res.status(400).json({ message: "Request must have amount, currency, cart" });
 
-                const { storeHash } = await getSession(req);
+                    return;
+                }
+         
 
                 const data = {
                     'amount': body.amount.toString(),
                     'currency': body.currency,
-                    'orderId': new Date().getTime() + new Date().getTime().toString().substring(1, 4),
+                    'orderId': body.orderId || new Date().getTime() + new Date().getTime().toString().substring(1, 4),
                     'cart': body.cart,
-                    'storeHash': storeHash,
+                    'storeHash': body.storeHash,
                     'redirectUrl': ''
                 }
 
@@ -42,7 +44,7 @@ export default async function merchant(req: NextApiRequest, res: NextApiResponse
             }
             break;
         default:
-            res.setHeader('Allow', ['GET', 'POST']);
+            res.setHeader('Allow', ['GET']);
             res.status(405).end(`Method ${method} Not Allowed`);
     }
 }

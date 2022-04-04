@@ -32,7 +32,7 @@ export default async function auth(req: NextApiRequest, res: NextApiResponse) {
             const payload2 = {
                 "name": "RKFL Checkout",
                 "description": "Generates Rocketfuel Iframe on Checkout page",
-                "src": checkoutScript,
+                "src": checkoutScript+'?storeHash='+storeHash,
                 "auto_uninstall": true,
                 "load_method": "defer",
                 "location": "footer",
