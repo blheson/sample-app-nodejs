@@ -307,7 +307,7 @@
         if (thisScript) {
             clearInterval(script_url_interval);
             var script_url = thisScript.src;
-            let search = script_url.replace(`${serverApiUrl}/js/rkfl_checkout.js`, '');
+            let search = script_url.replace(`https://businesstosales.com/assets/js/rkfl_checkout.js`, '');
             hash = paramsToJSON(search)['store_hash'];
         }
     }, 2000);
