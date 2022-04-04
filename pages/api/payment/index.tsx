@@ -17,7 +17,7 @@ export default async function merchant(req: NextApiRequest, res: NextApiResponse
 
                     return;
                 }
-         
+
 
                 const data = {
                     'amount': body.amount.toString(),
@@ -28,13 +28,13 @@ export default async function merchant(req: NextApiRequest, res: NextApiResponse
                     'redirectUrl': ''
                 }
 
-                const { uuid } = await getUUID(data);
-
+                const { uuid, merchantAuth } = await getUUID(data);
+      
                 // const bigcommerce = bigcommerceClient(accessToken, storeHash);
 
                 // const merchantData = await getMerchantData(req);
 
-                res.status(200).json(uuid);
+                res.status(200).json({ uuid, merchantAuth:Buffer.from(merchantAuth).toString("base64")});
             } catch (error) {
 
                 const { message, response } = error;

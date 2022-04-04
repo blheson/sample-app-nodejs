@@ -1,7 +1,8 @@
-
+import { getMerchantAuth } from '../lib/merchant';
 import { MerchantData, RKFLPayload } from '../types';
 
 import db from './db';
+
 
 function getEnvironment(environment) {
 
@@ -34,19 +35,22 @@ async function getMerchantData(storeHash): Promise<MerchantData> {
 }
 async function login(environment: string, { email, password }: MerchantData): Promise<{ access: string }> {
     const raw = { email, password };
-
+    const myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
     const response = await fetch(environment + '/auth/login', {
         method: "POST",
+        headers: myHeaders,
         body: JSON.stringify(raw)
     })
+
+
     const result = await response.json();
 
-    console.warn(result,raw,environment + '/auth/login');
 
     return { access: result.result.access };
 
 }
-async function charge(access: string, { environment, merchantId }: MerchantData, { amount, cart, currency, orderId, redirectUrl }: RKFLPayload): Promise<{ uuid: string }> {
+async function charge(access: string, environment, { merchantId: merchant_id }: MerchantData, { amount, cart, currency, orderId: order, redirectUrl }: RKFLPayload): Promise<{ uuid: string }> {
     const rkflHeaders: Headers = new Headers();
 
     rkflHeaders.append("Authorization", "Bearer " + access);
@@ -56,24 +60,32 @@ async function charge(access: string, { environment, merchantId }: MerchantData,
     const requestOptions: RequestInit = {
         method: 'POST',
         headers: rkflHeaders,
-        body: JSON.stringify({ amount, cart, merchantId, currency, orderId, redirectUrl }),
-        redirect: 'follow'
+        body: JSON.stringify({ amount, cart, merchant_id, currency, order, redirectUrl })
     };
-    const response = await fetch(environment + '/auth/login', requestOptions);
+
+    const response = await fetch(environment + '/hosted-page', requestOptions);
 
     const result = await response.json();
+ 
 
     return { uuid: result.result.uuid };
 
 }
-export async function getUUID(payload: RKFLPayload): Promise<{ uuid: string }> {
+export async function getUUID(payload: RKFLPayload): Promise<{ merchantAuth: string, uuid: string }> {
 
     const merchantData = await getMerchantData(payload.storeHash);
 
     const environment = getEnvironment(merchantData.environment);
 
+
     const { access } = await login(environment, merchantData);
 
-    return await charge(access, merchantData, payload);
+
+    const { uuid } = await charge(access, environment, merchantData, payload);
+
+    const result =  { merchantAuth: getMerchantAuth(merchantData.merchantId), uuid };
+
+
+    return result
 }
 

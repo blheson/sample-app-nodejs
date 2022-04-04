@@ -4,7 +4,7 @@ import * as BigCommerce from 'node-bigcommerce';
 import { ApiConfig, QueryParams, SessionContextProps, SessionProps } from '../types';
 import db from './db';
 
-const { API_URL, APP_URL, AUTH_CALLBACK, CLIENT_ID, CLIENT_SECRET, JWT_KEY, LOGIN_URL,RKFL_SDK, SCRIPT_CHECKOUT } = process.env;
+const { API_URL, APP_URL, AUTH_CALLBACK, CLIENT_ID, CLIENT_SECRET, JWT_KEY, LOGIN_URL,RKFL_SDK, SCRIPT_CHECKOUT,PUBLIC_KEY } = process.env;
 
 // Used for internal configuration; 3rd party apps may remove
 const apiConfig: ApiConfig = {};
@@ -34,6 +34,11 @@ const bigcommerceSigned = new BigCommerce({
 export const appURL = APP_URL;
 export const checkoutScript = SCRIPT_CHECKOUT;
 export const rkflSdkScript = RKFL_SDK;
+
+export const publicKey = "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA2e4stIYooUrKHVQmwztC\n/l0YktX6uz4bE1iDtA2qu4OaXx+IKkwBWa0hO2mzv6dAoawyzxa2jmN01vrpMkMj\nrB+Dxmoq7tRvRTx1hXzZWaKuv37BAYosOIKjom8S8axM1j6zPkX1zpMLE8ys3dUX\nFN5Dl/kBfeCTwGRV4PZjP4a+QwgFRzZVVfnpcRI/O6zhfkdlRah8MrAPWYSoGBpG\nCPiAjUeHO/4JA5zZ6IdfZuy/DKxbcOlt9H+z14iJwB7eVUByoeCE+Bkw+QE4msKs\naIn4xl9GBoyfDZKajTzL50W/oeoE1UcuvVfaULZ9DWnHOy6idCFH1WbYDxYYIWLi\nAQIDAQAB\n-----END PUBLIC KEY-----";
+
+// export const publicKey = PUBLIC_KEY;
+
 
 export function bigcommerceClient(accessToken: string, storeHash: string, apiVersion = 'v3') {
     return new BigCommerce({

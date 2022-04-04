@@ -1,11 +1,19 @@
-
+import crypto from 'crypto';
 import { NextApiRequest } from 'next';
 import { MerchantData } from '../types';
-import { decodePayload } from './auth';
+import { decodePayload , publicKey} from './auth';
 
 import db from './db';
 
+export function getMerchantAuth(merchantId){
+  
 
+        const buffer = Buffer.from(merchantId);
+       
+        const encrypted = crypto.publicEncrypt(publicKey, buffer);
+     
+        return encrypted.toString("base64");
+}
 
 export async function setMerchantData({ query: { context = '' } }, data: MerchantData) {
     if (typeof context !== 'string') return;
@@ -31,5 +39,4 @@ export async function getMerchantData({ query: { context = '' } }: NextApiReques
     
     return data;
 }
-
 
