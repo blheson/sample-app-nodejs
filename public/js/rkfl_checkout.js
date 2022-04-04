@@ -112,7 +112,7 @@
 
                 document.getElementById('checkout-payment-continue').removeEventListener('click', handlePlaceOrderButton, false);
 
-
+                document.getElementById('checkout-payment-continue').click();
             } catch (error) {
 
                 console.error('Error from update order method', error);
@@ -189,7 +189,7 @@
                     reject();
                 }
                 let userData = RocketfuelPaymentEngine.getUserData();
-                
+
                 console.log("This is the USER DATA, ", userData);
 
                 let payload, response, rkflToken;
@@ -413,7 +413,9 @@
 
     }
     function handlePlaceOrderButton(e) {
-        console.log(e, "Evernt from handle place order")
+        console.log(e, "Evernt from handle place order");
+        document.getElementById('checkout-payment-continue').disabled = true
+
         e.preventDefault();
         RocketfuelPaymentEngine.init();
     }
@@ -427,6 +429,7 @@
         } else {
             console.warn("RKFL HAS BEEN UNSELECTED");
             document.getElementById('checkout-payment-continue').removeEventListener('click', handlePlaceOrderButton, false);
+            document.getElementById('checkout-payment-continue').disabled = false
         }
 
 
