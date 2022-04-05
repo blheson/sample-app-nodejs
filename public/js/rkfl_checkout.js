@@ -6,7 +6,7 @@
     let currentPage = path.split('/').pop();
     var thisScript = document.currentScript;
     function paramsToJSON(search) {
-        var search = search.substring(1);
+         search = search.substring(1);
         return JSON.parse('{"' + decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g, '":"') + '"}')
     }
 

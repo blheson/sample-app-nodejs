@@ -1,18 +1,10 @@
 (() => {
+
     var serverApiUrl = 'https://rkfl-bigcommerce.herokuapp.com';
-
-
+    
     var path = window.location.pathname;
     let currentPage = path.split('/').pop();
     var thisScript = document.currentScript;
-    function paramsToJSON(search) {
-        var search = search.substring(1);
-        return JSON.parse('{"' + decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g, '":"') + '"}')
-    }
-
-
-
-
     // necessary infor include
     // merchant auth, uuid
     /**
@@ -22,7 +14,6 @@
 
         order_id: '',
         url: new URL(window.location.href),
-        hash: '',
         watchIframeShow: false,
         rkflConfig: null,
         user_data: {
@@ -72,18 +63,18 @@
 
         },
         getEnvironment: function () {
-            return RocketfuelPaymentEngine.response?.environment || 'prod';
+            return 'prod';
         },
         getUserData: function () {
 
 
-            let email = RocketfuelPaymentEngine.user_data.email || document.querySelector('.customerView-body.optimizedCheckout-contentPrimary')?.innerText || null;
+            let email = RocketfuelPaymentEngine.user_data.email || validateEmail(document.querySelector('.customerView-body.optimizedCheckout-contentPrimary').innerText) ? document.querySelector('.customerView-body.optimizedCheckout-contentPrimary').innerText : null;
 
             let user_data = {
-                firstName: document.querySelector('.first-name')?.innerText || null,
-                lastName: document.querySelector('.family-name')?.innerText || null,
+                first_name: document.querySelector('.first-name')?.innerText || null,
+                last_name: document.querySelector('.family-name')?.innerText || null,
                 email,
-                merchantAuth: 'TNc/qaLPSX+al57l7jKkmKz2nPNzJXowAK0AlBwFNTLXdjh0OD74SyqhOTXlM+JA3O1LsxgH0Jm+Z9Rs5nulVI5uGveycWbPsBj912bv8tbuFTUJlgDGZk9mxnZ4lZWNKCusFxuILRJ9qMjJSFB16AeFkI1hVVvEH3tfnEDdx5bcZFDFyEGD1F0P/Lwg0Vvo4gKqKfbaptH5pgX35iXomXC8HvTQyDVIZWi4wa52PYZr0Ws0Jgb7NcNSqHmoviQr8889SOrsWMjeu7YsDpPFEsgx+Knox5+IfFfj1OwpqflzxShtKvepjCxFfnBoV09BP230h/+/zmTkhs7yaTytew=='
+                merchant_auth: 'TNc/qaLPSX+al57l7jKkmKz2nPNzJXowAK0AlBwFNTLXdjh0OD74SyqhOTXlM+JA3O1LsxgH0Jm+Z9Rs5nulVI5uGveycWbPsBj912bv8tbuFTUJlgDGZk9mxnZ4lZWNKCusFxuILRJ9qMjJSFB16AeFkI1hVVvEH3tfnEDdx5bcZFDFyEGD1F0P/Lwg0Vvo4gKqKfbaptH5pgX35iXomXC8HvTQyDVIZWi4wa52PYZr0Ws0Jgb7NcNSqHmoviQr8889SOrsWMjeu7YsDpPFEsgx+Knox5+IfFfj1OwpqflzxShtKvepjCxFfnBoV09BP230h/+/zmTkhs7yaTytew=='
             }
 
             if (!user_data) return false;
@@ -91,7 +82,6 @@
             return user_data;
 
         },
-
         updateOrder: function (result) {
             try {
 
@@ -154,7 +144,6 @@
 
             //show retrigger button
             document.getElementById('rocketfuel_payment').disabled = false;
-            document.getElementById('checkout-payment-continue').disabled = false
 
 
         },
@@ -212,7 +201,7 @@
                 });
 
                 // let uuid = await this.getUUID(); //set uuid
-                let uuid = this.response.uuid; //set uuid
+                let uuid = await this.response.uuid; //set uuid
 
                 RocketfuelPaymentEngine.rkflConfig = {
                     uuid,
@@ -220,12 +209,12 @@
                     environment: RocketfuelPaymentEngine.getEnvironment()
                 }
 
-                if (userData.firstName && userData.email) {
+                if (userData.first_name && userData.email) {
                     payload = {
-                        firstName: userData.firstName,
-                        lastName: userData.lastName,
+                        firstName: userData.first_name,
+                        lastName: userData.last_name,
                         email: userData.email,
-                        merchantAuth: userData.merchantAuth,
+                        merchantAuth: userData.merchant_auth,
                         kycType: 'null',
                         kycDetails: {
                             'DOB': "01-01-1990"
@@ -309,7 +298,21 @@
 
         }
     }
+    function paramsToJSON(search) {
+        var search = search.substring(1);
+        return JSON.parse('{"' + decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g, '":"') + '"}')
+    }
 
+    var hash = '';
+
+    var script_url_interval = setInterval(function () {
+        if (thisScript) {
+            clearInterval(script_url_interval);
+            var script_url = thisScript.src;
+            let search = script_url.replace(`https://businesstosales.com/assets/js/rkfl_checkout.js`, '');
+            hash = paramsToJSON(search)['store_hash'];
+        }
+    }, 2000);
 
     function sortIndividual(items) {
         return items.map(item => {
@@ -372,10 +375,10 @@
                     currency: theIndex.currency.code,
                     cart,
                     amount: theIndex.baseAmount,
-                    storeHash: RocketfuelPaymentEngine.hash
+                    storeHash: hash
                 }
 
-                console.log('Sorted Cart ', cart, RocketfuelPaymentEngine.hash);
+                console.log('Sorted Cart ', cart);
                 //Get UUID here
                 //fetch here
                 var myHeaders = new Headers();
@@ -386,20 +389,20 @@
                     method: 'POST',
                     headers: myHeaders,
                     body: JSON.stringify(payload),
-
+                    redirect: 'follow'
                 };
 
+                // let uuidResponse = await fetch(serverApiUrl + "/api/payment", requestOptions);
                 let uuidResponse = await fetch(serverApiUrl + "/payment.php", requestOptions);
 
 
 
-                let uuidResult = await uuidResponse.json();
-
-                console.log('Parse result: ', uuidResult);
+                let uuidResult = await uuidResponse.text();
+                console.log('Parse result: ', JSON.parse(uuidResult));
 
                 //response here
                 //set localstorage
-                RocketfuelPaymentEngine.response = uuidResult
+                RocketfuelPaymentEngine.response = JSON.parse(uuidResult)
 
 
                 console.log('Engin response ', RocketfuelPaymentEngine.response);
@@ -420,8 +423,6 @@
         RocketfuelPaymentEngine.init();
     }
     function handleClick(e) {
-        
-        console.log(e.target.id, "e.target.id")
 
         if (e.target.id === 'radio-moneyorder') {
 
@@ -440,26 +441,12 @@
     if (currentPage.includes('checkout')) {
 
         document.addEventListener('DOMContentLoaded', async () => {
-            var scriptUrlInterval = setInterval(async function () {
 
-                if (thisScript) {
-                    clearInterval(scriptUrlInterval);
-                    var script_url = thisScript.src;
-                    let search = script_url.replace(`https://businesstosales.com/assets/js/rkfl_checkout.js`, '');
-                    let par = paramsToJSON(search)
-
-                    RocketfuelPaymentEngine.hash = par['storeHash'];
-                    // hash = search.split('&')[0].split('=')[1]
-                    // console.log(hash,'search')
-                    // hash = hash.split('&')[0];
-                    await initUUID();
-                }
-            }, 2000);
-
+            await initUUID();
 
             let formChecklist = setInterval(() => {
 
-
+                console.log('Checking for ')
 
                 if (document.querySelector('.form-checklist.optimizedCheckout-form-checklist')) {
                     console.log('Interval has been cleared for ')
