@@ -1,5 +1,7 @@
-import { Box, Tabs } from '@bigcommerce/big-design';
+import { Box, H1 } from '@bigcommerce/big-design';
+import Image from 'next/image';
 import { useRouter } from 'next/router';
+
 import { useEffect, useState } from 'react';
 import InnerHeader from './innerHeader';
 
@@ -11,7 +13,7 @@ export const TabIds = {
 export const TabRoutes = {
     [TabIds.HOME]: '/',
     [TabIds.MERCHANT]: '/merchant'
-    
+
 };
 
 const HeaderlessRoutes = [
@@ -31,7 +33,7 @@ const HeaderTypes = {
 };
 
 const Header = () => {
-    const [activeTab, setActiveTab] = useState<string>('');
+
     const [headerType, setHeaderType] = useState<string>(HeaderTypes.GLOBAL);
     const router = useRouter();
     const { pathname } = router;
@@ -44,10 +46,9 @@ const Header = () => {
             setHeaderType(HeaderTypes.HEADERLESS);
         } else {
             // Check if new route matches TabRoutes
-            const tabKey = Object.keys(TabRoutes).find(key => TabRoutes[key] === pathname);
 
             // Set the active tab to tabKey or set no active tab if route doesn't match (404)
-            setActiveTab(tabKey ?? '');
+
             setHeaderType(HeaderTypes.GLOBAL);
         }
 
@@ -58,27 +59,21 @@ const Header = () => {
         router.prefetch('/products');
     });
 
-    const items = [
-        { id: TabIds.HOME, title: 'Home' },
-        { id: TabIds.MERCHANT, title: 'Merchant' },
-    ];
 
-    const handleTabClick = (tabId: string) => {
-        setActiveTab(tabId);
-
-        return router.push(TabRoutes[tabId]);
-    };
 
     if (headerType === HeaderTypes.HEADERLESS) return null;
     if (headerType === HeaderTypes.INNER) return <InnerHeader />;
 
     return (
         <Box marginBottom="xxLarge">
-            <Tabs
+            <Image src='https://store.rocketfuelblockchain.com/wp-content/uploads/2021/04/RocketFuelLogo-450x81.png' width='166' height='29.88' />
+            <H1>Welcome to Rocketfuel</H1>
+            <span>Please fill in your details below</span>
+            {/* <Tabs
                 activeTab={activeTab}
                 items={items}
                 onTabClick={handleTabClick}
-            />
+            /> */}
         </Box>
     );
 };

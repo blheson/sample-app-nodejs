@@ -53,7 +53,7 @@ export default async function merchant(req: NextApiRequest, res: NextApiResponse
 
                 const { uuid, merchantAuth,environment } = await getUUID(data);
                 const result = { uuid, merchantAuth: Buffer.from(merchantAuth).toString("base64"),environment };
-                console.log(result, "result");
+               
                 // const bigcommerce = bigcommerceClient(accessToken, storeHash);
 
                 // const merchantData = await getMerchantData(req);

@@ -41,3 +41,15 @@ const productMock = {
 export const useProductInfo = jest.fn().mockImplementation(() => ({
     product: productMock,
 }));
+// useMerchant Mock
+const merchantMock = {
+    environment: 'dev',
+    password: 'test',
+    email: 'test@test.com',
+    merchantId: 'test-test',
+    publicKey: 'pk',
+};
+
+export const useMerchant = jest.fn().mockImplementation(() => ({
+    merchant: merchantMock
+}))

@@ -2,14 +2,14 @@
 import ErrorMessage from '../components/error';
 import MerchantForm from '../components/merchantForm';
 import { useSession } from '../context/session';
-import { useUser } from '../lib/hooks';
+import { useMerchant } from '../lib/hooks';
 import { MerchantData } from "../types/data";
 
 const Merchant = () => {
     const {
         merchantData,
         error
-    } = useUser();
+    } = useMerchant();
 
     const encodedContext = useSession()?.context;
 

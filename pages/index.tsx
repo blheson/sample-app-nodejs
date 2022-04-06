@@ -1,18 +1,21 @@
 import { AlertProps } from '@bigcommerce/big-design';
 import ErrorMessage from '../components/error';
+import Loading from '../components/loading';
 import MerchantForm from '../components/merchantForm';
 import { useSession } from '../context/session';
-import { useUser } from '../lib/hooks';
+import { useMerchant } from '../lib/hooks';
 import { MerchantData } from "../types/data";
 import { alertsManager } from './_app';
+
 
 
 
 const Index = () => {
     const {
         merchantData = [],
+        isLoading,
         error
-    } = useUser();
+    } = useMerchant();
 
 
     const encodedContext = useSession()?.context;
@@ -58,7 +61,7 @@ const Index = () => {
 
         return result;
     }
-    // if (isLoading) return <Loading />;
+    if (isLoading) return <Loading />;
     if (error) return <ErrorMessage error={error} />;
 
     return (<MerchantForm formData={newData} onSubmit={handleSubmit} />);

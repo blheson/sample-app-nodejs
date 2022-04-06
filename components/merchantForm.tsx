@@ -13,125 +13,137 @@ const FormErrors = {
 const MerchantForm = ({ formData, onSubmit }: FormProps) => {
     const { environment, password, email, merchantId, publicKey } = formData;
 
- 
-const [form, setForm] = useState<MerchantData>({ environment, password, email, merchantId, publicKey });
-const [errors, setErrors] = useState<StringKeyValue>({});
 
-const handleSubmit = (event: FormEvent<EventTarget>) => {
-    event.preventDefault();
+    const [form, setForm] = useState<MerchantData>({ environment, password, email, merchantId, publicKey });
+    const [errors, setErrors] = useState<StringKeyValue>({});
 
-    // If there are errors, do not submit the form
-    const hasErrors = Object.keys(errors).length > 0;
+    const handleSubmit = (event: FormEvent<EventTarget>) => {
+        event.preventDefault();
 
-    if (hasErrors) return;
+        // If there are errors, do not submit the form
+        const hasErrors = Object.keys(errors).length > 0;
 
-    onSubmit(form);
-};
+        if (hasErrors) return;
 
-const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name: formName, value } = event?.target;
-    setForm(prevForm => ({ ...prevForm, [formName]: value }));
+        onSubmit(form);
+    };
 
-    // Add error if it exists in FormErrors and the input is empty, otherwise remove from errors
-    !value && FormErrors[formName]
-        ? setErrors(prevErrors => ({ ...prevErrors, [formName]: FormErrors[formName] }))
-        : setErrors(({ [formName]: removed, ...prevErrors }) => ({ ...prevErrors }));
-};
-const handleSelectChange = (value: string) => {
+    const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name: formName, value } = event?.target;
+        setForm(prevForm => ({ ...prevForm, [formName]: value }));
 
-    setForm(prevForm => ({ ...prevForm, environment: value }));
-};
+        // Add error if it exists in FormErrors and the input is empty, otherwise remove from errors
+        !value && FormErrors[formName]
+            ? setErrors(prevErrors => ({ ...prevErrors, [formName]: FormErrors[formName] }))
+            : setErrors(({ [formName]: removed, ...prevErrors }) => ({ ...prevErrors }));
+    };
+    const handleSelectChange = (value: string) => {
 
-return (
-    <>
-        <Form onSubmit={handleSubmit} >
-            <FormGroup>
-                <Input
-                    label="Email"
-                    type="email"
-                    error={errors?.email}
-                    name="email"
-                    onChange={handleChange}
-                    value={form.email}
-                    placeholder="Email address"
-                    required
-                />
-            </FormGroup>
-            <FormGroup>
-                <Input
-                    label="Password"
-                    type="password"
-                    name="password"
-                    error={errors?.password}
+        setForm(prevForm => ({ ...prevForm, environment: value }));
+    };
 
-                    onChange={handleChange}
-                    value={form.password}
+    return (
+        <>
+            <Form onSubmit={handleSubmit} >
+                <FormGroup>
+                    <Input
+                        label="Email"
+                        id="rkfl_input_1"
+                        labelId='1'
+                        type="email"
+                        error={errors?.email}
+                        name="email"
+                        onChange={handleChange}
+                        value={form.email}
+                        placeholder="Email address"
+                        required
+                    />
+                </FormGroup>
+                <FormGroup>
+                    <Input
+                        label="Password"
+                        labelId='2'
+                        type="password"
+                        name="password"
+                        error={errors?.password}
+                        id="rkfl_input_2"
+                        title="password"
+                        onChange={handleChange}
+                        value={form.password}
 
-                    description=""
-                    placeholder="******"
-                    required
-                />
-            </FormGroup>
-            <FormGroup>
+                        description=""
+                        placeholder="******"
+                        required
+                    />
+                </FormGroup>
+                <FormGroup>
 
-                <Input
-                    label="Merchant ID"
-                    type="text"
-                    name="merchantId"
-                    error={errors?.merchantId}
+                    <Input
+                        label="Merchant ID"
+                        type="text"
+                        labelId='3'
+                        id="rkfl_input_3"
 
-                    value={form.merchantId}
-                    onChange={handleChange}
+                        name="merchantId"
+                        error={errors?.merchantId}
 
-                    placeholder="eyyh-euuej-ee"
-                    required
-                />
-            </FormGroup>
-            <FormGroup>
+                        value={form.merchantId}
+                        onChange={handleChange}
 
-                <Textarea
-                    label="Public Key"
+                        placeholder="eyyh-euuej-ee"
+                        required
+                    />
+                </FormGroup>
+                <FormGroup>
 
-                    name="publicKey"
-                    error={errors?.publicKey}
-                    rows={3}
-                    resize={true}
-                    value={form.publicKey}
-                    onChange={handleChange}
-                    description="Public Key."
-                    placeholder="Public Key..."
-                    required
-                />
-            </FormGroup>
+                    <Textarea
+                        label="Public Key"
+                        labelId='4'
+                        id="rkfl_input_4"
 
-            <FormGroup>
-                <Select
-                    label="Environment"
-                    onOptionChange={handleSelectChange}
-                    value={form.environment}
-                    name="environment"
-                    error={errors?.environment}
+                        name="publicKey"
+                        error={errors?.publicKey}
+                        rows={3}
+                        resize={true}
+                        value={form.publicKey}
+                        onChange={handleChange}
+                        description="Public Key."
+                        placeholder="Public Key..."
+                        required
+                    />
+                </FormGroup>
 
-                    options={[
-                        { value: 'prod', content: 'Production' },
-                        { value: 'sandbox', content: 'Sandbox' },
-                        { value: 'dev', content: 'Development' },
-                        { value: 'stage2', content: 'QA' },
-                        { value: 'preprod', content: 'Pre-Production' },
-                    ]}
-                    placeholder="Environment"
-                    required
-                />
-            </FormGroup>
-            <Flex>
-                <Button type="submit">Save Details</Button>
-            </Flex>
+                <FormGroup>
+                    <Select
+                        label="Environment"
+                        labelId='5'
+                        id="rkfl_input_5"
+                        aria-controls='rkfl-bd-select-75-menu'
+                        onOptionChange={handleSelectChange}
+                        value={form.environment}
+                        name="environment"
+                        error={errors?.environment}
+
+                        options={[
+                            { value: 'prod', content: 'Production' },
+                            { value: 'sandbox', content: 'Sandbox' },
+                            { value: 'dev', content: 'Development' },
+                            { value: 'stage2', content: 'QA' },
+                            { value: 'preprod', content: 'Pre-Production' },
+                        ]}
+                        placeholder="Environment"
+                        required
+                    />
+                </FormGroup>
+                <Flex>
+                    <Button type="submit">Save Details</Button>
+                </Flex>
 
 
-        </Form>
-    </>
+            </Form>
+        </>
 
-);
+    );
 };
 
 export default MerchantForm;

@@ -92,7 +92,7 @@ export const useShippingAndProductsInfo = (orderId: number) => {
         error,
     };
 }
-export  function useUser(query?: QueryParams) {
+export  function useMerchant(query?: QueryParams) {
     const { context } = useSession();
     // const context  = "useSession()";
   
@@ -101,7 +101,7 @@ export  function useUser(query?: QueryParams) {
 
     // Use an array to send multiple arguments to fetcher
     const { data, error } = useSWR(context ? ['/api/merchant', params] : null, fetcher);
- 
+
     return {
         merchantData:data,
         isLoading: !data && !error,

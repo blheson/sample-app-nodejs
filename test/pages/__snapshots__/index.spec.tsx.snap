@@ -1,63 +1,233 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Homepage renders correctly 1`] = `
-<div
-  class="styled__StyledBox-sc-sj5f1m-0 enCgpJ styled__StyledPanel-sc-1h6ef3q-0 ckPgGY"
+exports[`Homepage renders form 1`] = `
+<form
+  class="styled__StyledForm-sc-qzey9b-0 haqnpB"
 >
   <div
-    class="styled__StyledBox-sc-sj5f1m-0 gpwFUN styled__StyledFlex-sc-hcvk8l-0 dLyzVq"
+    class="styled__StyledInlineGroup-sc-1a6yr6l-2 jiJxde"
   >
-    <h2
-      class="styled__StyledH2-sc-tqnj75-2 styled__StyledH2-sc-1h6ef3q-1 knwcSP ctLPEl"
-    >
-      Homepage
-    </h2>
+    <div>
+      <label
+        class="styled__StyledH4-sc-tqnj75-4 styled__StyledLabel-sc-m3fyue-0 XRfzZ cgVpUS"
+        for="rkfl_input_1"
+        id="1"
+      >
+        Email
+      </label>
+      <span
+        class="styled__StyledInputWrapper-sc-g32raa-0 kqLUdD"
+      >
+        <div
+          class="styled__StyledInputContent-sc-g32raa-3 gSfFFG"
+        >
+          <input
+            class="styled__StyledInput-sc-g32raa-1 cYyall"
+            id="rkfl_input_1"
+            name="email"
+            placeholder="Email address"
+            required=""
+            type="email"
+            value=""
+          />
+        </div>
+      </span>
+    </div>
   </div>
   <div
-    class="styled__StyledBox-sc-sj5f1m-0 gpwFUN styled__StyledFlex-sc-hcvk8l-0 ehkSnw"
+    class="styled__StyledInlineGroup-sc-1a6yr6l-2 jiJxde"
   >
-    <div
-      class="styled__StyledBox-sc-sj5f1m-0 eIgohU pages__StyledBox-sc-jwwna7-0 NXloA"
-    >
-      <h4
-        class="styled__StyledH4-sc-tqnj75-4 XWDyH"
+    <div>
+      <label
+        class="styled__StyledH4-sc-tqnj75-4 styled__StyledLabel-sc-m3fyue-0 XRfzZ cgVpUS"
+        for="rkfl_input_2"
+        id="2"
       >
-        Inventory count
-      </h4>
-      <h1
-        class="styled__StyledH1-sc-tqnj75-1 gMdvEW"
+        Password
+      </label>
+      <span
+        class="styled__StyledInputWrapper-sc-g32raa-0 kqLUdD"
       >
-        3
-      </h1>
-    </div>
-    <div
-      class="styled__StyledBox-sc-sj5f1m-0 eIgohU pages__StyledBox-sc-jwwna7-0 NXloA"
-    >
-      <h4
-        class="styled__StyledH4-sc-tqnj75-4 XWDyH"
-      >
-        Variant count
-      </h4>
-      <h1
-        class="styled__StyledH1-sc-tqnj75-1 gMdvEW"
-      >
-        2
-      </h1>
-    </div>
-    <div
-      class="styled__StyledBox-sc-sj5f1m-0 USQGy pages__StyledBox-sc-jwwna7-0 NXloA"
-    >
-      <h4
-        class="styled__StyledH4-sc-tqnj75-4 XWDyH"
-      >
-        Primary category
-      </h4>
-      <h1
-        class="styled__StyledH1-sc-tqnj75-1 gMdvEW"
-      >
-        widgets
-      </h1>
+        <div
+          class="styled__StyledInputContent-sc-g32raa-3 gSfFFG"
+        >
+          <input
+            class="styled__StyledInput-sc-g32raa-1 cYyall"
+            id="rkfl_input_2"
+            name="password"
+            placeholder="******"
+            required=""
+            title="password"
+            type="password"
+            value=""
+          />
+        </div>
+      </span>
     </div>
   </div>
-</div>
+  <div
+    class="styled__StyledInlineGroup-sc-1a6yr6l-2 jiJxde"
+  >
+    <div>
+      <label
+        class="styled__StyledH4-sc-tqnj75-4 styled__StyledLabel-sc-m3fyue-0 XRfzZ cgVpUS"
+        for="rkfl_input_3"
+        id="3"
+      >
+        Merchant ID
+      </label>
+      <span
+        class="styled__StyledInputWrapper-sc-g32raa-0 kqLUdD"
+      >
+        <div
+          class="styled__StyledInputContent-sc-g32raa-3 gSfFFG"
+        >
+          <input
+            class="styled__StyledInput-sc-g32raa-1 cYyall"
+            id="rkfl_input_3"
+            name="merchantId"
+            placeholder="eyyh-euuej-ee"
+            required=""
+            type="text"
+            value=""
+          />
+        </div>
+      </span>
+    </div>
+  </div>
+  <div
+    class="styled__StyledInlineGroup-sc-1a6yr6l-2 jiJxde"
+  >
+    <div>
+      <label
+        class="styled__StyledH4-sc-tqnj75-4 styled__StyledLabel-sc-m3fyue-0 XRfzZ cgVpUS"
+        for="rkfl_input_4"
+        id="4"
+      >
+        Public Key
+      </label>
+      <p
+        class="styled__StyledSmall-sc-tqnj75-6 gwPtCU"
+      >
+        Public Key.
+      </p>
+      <span
+        class="styled__StyledTextareaWrapper-sc-c1uos0-0 eavuQn"
+      >
+        <textarea
+          class="styled__StyledTextarea-sc-c1uos0-1 hkGtZF"
+          id="rkfl_input_4"
+          name="publicKey"
+          placeholder="Public Key..."
+          required=""
+          rows="3"
+        />
+      </span>
+    </div>
+  </div>
+  <div
+    class="styled__StyledInlineGroup-sc-1a6yr6l-2 jiJxde"
+  >
+    <div>
+      <label
+        class="styled__StyledH4-sc-tqnj75-4 styled__StyledLabel-sc-m3fyue-0 XRfzZ cgVpUS"
+        for="rkfl_input_5"
+        id="5"
+      >
+        Environment
+      </label>
+      <div
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        aria-owns="bd-select-5-menu"
+        role="combobox"
+      >
+        <div
+          class="styled__StyledInputContainer-sc-1v66t78-2 cwtBIS"
+        >
+          <div>
+            <span
+              class="styled__StyledInputWrapper-sc-g32raa-0 kqLUdD"
+            >
+              <div
+                class="styled__StyledInputContent-sc-g32raa-3 gSfFFG"
+              >
+                <input
+                  aria-autocomplete="list"
+                  aria-controls="rkfl-bd-select-75-menu"
+                  aria-labelledby="5"
+                  autocomplete="off"
+                  class="styled__StyledInput-sc-g32raa-1 bWoXXx"
+                  id="rkfl_input_5"
+                  name="environment"
+                  placeholder="Environment"
+                  required=""
+                  value=""
+                />
+              </div>
+              <div
+                class="styled__StyledIconWrapper-sc-g32raa-2 jnYXyh"
+              >
+                <button
+                  aria-label="toggle menu"
+                  class="styled__StyledButton-sc-3yq204-0 jNqJzF styled__DropdownButton-sc-1v66t78-3 fhvqti"
+                  id="bd-select-5-toggle-button"
+                  tabindex="-1"
+                  type="button"
+                >
+                  <span
+                    class="styled__ContentWrapper-sc-3yq204-1 cDAvMI"
+                  >
+                    <svg
+                      class="base__StyledIcon-sc-a9u0e1-0 bwFIuO styled__StyledDropdownIcon-sc-1v66t78-1 erQgzy"
+                      fill="currentColor"
+                      height="24"
+                      stroke="currentColor"
+                      stroke-width="0"
+                      viewBox="0 0 24 24"
+                      width="24"
+                    >
+                      <path
+                        d="M0 0h24v24H0V0z"
+                        fill="none"
+                      />
+                      <path
+                        d="M8.71 11.71l2.59 2.59c.39.39 1.02.39 1.41 0l2.59-2.59c.63-.63.18-1.71-.71-1.71H9.41c-.89 0-1.33 1.08-.7 1.71z"
+                      />
+                    </svg>
+                  </span>
+                </button>
+              </div>
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="styled__StyledBox-sc-sj5f1m-0 jSPVqw"
+        style="position: absolute; left: 0px; top: 0px;"
+      >
+        <ul
+          aria-labelledby="5"
+          class="styled__StyledList-sc-5w3dcq-0 dJHrfL"
+          id="bd-select-5-menu"
+          role="listbox"
+        />
+      </div>
+    </div>
+  </div>
+  <div
+    class="styled__StyledBox-sc-sj5f1m-0 gHBxjL styled__StyledFlex-sc-hcvk8l-0 bsAzTi"
+  >
+    <button
+      class="styled__StyledButton-sc-3yq204-0 gNEAQl bd-button"
+      type="submit"
+    >
+      <span
+        class="styled__ContentWrapper-sc-3yq204-1 cDAvMI"
+      >
+        Save Details
+      </span>
+    </button>
+  </div>
+</form>
 `;

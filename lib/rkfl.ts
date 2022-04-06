@@ -71,7 +71,7 @@ async function charge(access: string, environment, { merchantId: merchant_id }: 
     return { uuid: result.result.uuid };
 
 }
-export async function getUUID(payload: RKFLPayload): Promise<{ merchantAuth: string, uuid: string }> {
+export async function getUUID(payload: RKFLPayload): Promise<{ merchantAuth: string, uuid: string ,environment:string}> {
 
     const merchantData = await getMerchantData(payload.storeHash);
 
