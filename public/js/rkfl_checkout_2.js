@@ -502,7 +502,7 @@
             let thankyouInter = setInterval(() => {
                 if (!document.querySelector('p[data-test=order-confirmation-order-status-text]')) return;
                 document.querySelector('p[data-test=order-confirmation-order-status-text]').innerHTML = 'Your order has been received'
-                document.querySelector('p[data-test=payment-instructions]').innerHTML = ''
+                document.querySelector('div[data-test=payment-instructions]').innerHTML = ''
 
                 clearInterval(thankyouInter)
             }, 1000);
