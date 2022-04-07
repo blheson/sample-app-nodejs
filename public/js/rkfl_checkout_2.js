@@ -37,15 +37,7 @@
 
                 if (document.querySelector('#radio-moneyorder')) {
 
-                    document.querySelector('#radio-moneyorder').parentElement.querySelector('label .paymentProviderHeader-cc').innerHTML = '<div id="rocketfuel_payment" class="rocketfuel_payment">Click to pay</div>';
 
-
-                    document.querySelector(".rocketfuel_payment").addEventListener('click', (e) => {
-
-
-                        RocketfuelPaymentEngine.init();
-
-                    })
                     clearInterval(checkIframe);
                 }
 
@@ -72,18 +64,19 @@
 
         },
         getEnvironment: function () {
-            return RocketfuelPaymentEngine.response?.environment || 'prod';
+            return RocketfuelPaymentEngine.response?.environment || 'stage2';
         },
         getUserData: function () {
 
 
             let email = RocketfuelPaymentEngine.user_data.email || document.querySelector('.customerView-body.optimizedCheckout-contentPrimary')?.innerText || null;
-
+            const merchantAuth = 'Z+ASsXb/1puWbNxU20jRVtegmZmMg9MtJMAY4h9a/K5vVVvfnDd2LN42fGlOgkq4iKnDFiqF/juYKFNV8YrOht7Y9Qjtamz9cJHhVdqtlabnBIFJCPefHb6FD2ZpQt7qfPTd9LBg15mkndTvq9WoVWvwj7spSHAwXgw1VVGL1ByICVG7AKHZJef6wLX08muTgcOkkLjS8cI00YCoCWqziXgEIJ6fssgFQby6dr6+vTccAgIamt/OHZ1VIqHdXwunv/ai/rPOPrBVhee9KXNDBOUy2n5F+M18itNbvIKvi4oiMU27QohM1hHvwXQLlU3xY4rCLr/kps4NlkwqdeomDg=='; //qa 2335689b-7a4d-420a-9cc0-f5d765a96967
+            // const merchantAuth = 'TNc/qaLPSX+al57l7jKkmKz2nPNzJXowAK0AlBwFNTLXdjh0OD74SyqhOTXlM+JA3O1LsxgH0Jm+Z9Rs5nulVI5uGveycWbPsBj912bv8tbuFTUJlgDGZk9mxnZ4lZWNKCusFxuILRJ9qMjJSFB16AeFkI1hVVvEH3tfnEDdx5bcZFDFyEGD1F0P/Lwg0Vvo4gKqKfbaptH5pgX35iXomXC8HvTQyDVIZWi4wa52PYZr0Ws0Jgb7NcNSqHmoviQr8889SOrsWMjeu7YsDpPFEsgx+Knox5+IfFfj1OwpqflzxShtKvepjCxFfnBoV09BP230h/+/zmTkhs7yaTytew=='//merchant test prod 75e5cc4e-fad4-45b2-96d5-9dfea2ccb744
             let user_data = {
                 firstName: document.querySelector('.first-name')?.innerText || null,
                 lastName: document.querySelector('.family-name')?.innerText || null,
                 email,
-                merchantAuth: 'TNc/qaLPSX+al57l7jKkmKz2nPNzJXowAK0AlBwFNTLXdjh0OD74SyqhOTXlM+JA3O1LsxgH0Jm+Z9Rs5nulVI5uGveycWbPsBj912bv8tbuFTUJlgDGZk9mxnZ4lZWNKCusFxuILRJ9qMjJSFB16AeFkI1hVVvEH3tfnEDdx5bcZFDFyEGD1F0P/Lwg0Vvo4gKqKfbaptH5pgX35iXomXC8HvTQyDVIZWi4wa52PYZr0Ws0Jgb7NcNSqHmoviQr8889SOrsWMjeu7YsDpPFEsgx+Knox5+IfFfj1OwpqflzxShtKvepjCxFfnBoV09BP230h/+/zmTkhs7yaTytew=='
+                merchantAuth
             }
 
             if (!user_data) return false;
@@ -91,14 +84,25 @@
             return user_data;
 
         },
+        triggerPlaceOrder: function () {
 
+            console.log('Trigger is calling');
+
+            document.getElementById('checkout-payment-continue').removeEventListener('click', handlePlaceOrderButton, false);
+            document.getElementById('checkout-payment-continue').disabled = false;
+            console.log("Event has been removed from button");
+
+            document.getElementById('checkout-payment-continue').click();
+            console.log("Place order triggered");
+            console.log('Trigger has neen called ');
+        },
         updateOrder: function (result) {
             try {
 
                 console.log("Response from callback :", result, result?.status === undefined);
 
 
-                let status = "wc-on-hold";
+                let status = "bc-failed";
 
                 if (result?.status === undefined) {
                     return false;
@@ -107,24 +111,23 @@
                 let result_status = parseInt(result.status);
 
                 if (result_status === 101) {
-                    status = "wc-partial-payment";
+                    status = "bc-partial-payment";
                 }
 
-                if (result_status === 1 || result.status === "completed") {
+                if (result_status === 1 || result.status === "completed" || result.status === 0) {
 
-                    status = 'wc-processing';
+                    status = 'bc-processing';
 
                 }
 
                 if (result_status === -1) {
-                    status = "wc-failed";
+                    status = "bc-failed";
                 }
 
                 window.localStorage.setItem('payment_complete_order_status_rocketfuel', status);
 
-                document.getElementById('checkout-payment-continue').removeEventListener('click', handlePlaceOrderButton, false);
 
-                document.getElementById('checkout-payment-continue').click();
+
             } catch (error) {
 
                 console.error('Error from update order method', error);
@@ -135,10 +138,9 @@
 
         startPayment: function (autoTriggerState = true) {
 
-            // document.getElementById('rocketfuel_payment').innerText = "Preparing Payment window...";
+
             this.watchIframeShow = true;
 
-            document.getElementById('rocketfuel_payment').disabled = true;
 
             let checkIframe = setInterval(() => {
 
@@ -153,17 +155,12 @@
         prepareRetrigger: function () {
 
             //show retrigger button
-            document.getElementById('rocketfuel_payment').disabled = false;
+
             document.getElementById('checkout-payment-continue').disabled = false
 
 
         },
-        prepareProgressMessage: function () {
 
-            //revert trigger button message
-            document.getElementById('rocketfuel_payment').disabled = true;
-
-        },
 
         windowListener: function () {
             let engine = this;
@@ -173,9 +170,12 @@
                 switch (event.data.type) {
                     case 'rocketfuel_iframe_close':
                         engine.prepareRetrigger();
+                        if (event.data.paymentCompleted === 1) {
+                            engine.triggerPlaceOrder();
+                        }
                         break;
                     case 'rocketfuel_new_height':
-                        engine.prepareProgressMessage();
+
                         engine.watchIframeShow = false;
 
                     case 'rocketfuel_result_ok':
@@ -341,9 +341,9 @@
 
     }
     async function initUUID() {
-        await RocketfuelPaymentEngine.loadButtonRkfl();
+        // await RocketfuelPaymentEngine.loadButtonRkfl();
 
-        console.log('Button loaded');
+        // console.log('Button loaded');
 
         var requestOptions = {
             method: 'GET',
@@ -420,7 +420,7 @@
         RocketfuelPaymentEngine.init();
     }
     function handleClick(e) {
-        
+
         console.log(e.target.id, "e.target.id")
 
         if (e.target.id === 'radio-moneyorder') {
@@ -440,21 +440,22 @@
     if (currentPage.includes('checkout')) {
 
         document.addEventListener('DOMContentLoaded', async () => {
-            var scriptUrlInterval = setInterval(async function () {
+            await initUUID();
+            // var scriptUrlInterval = setInterval(async function () {
 
-                if (thisScript) {
-                    clearInterval(scriptUrlInterval);
-                    var script_url = thisScript.src;
-                    let search = script_url.replace(`https://businesstosales.com/assets/js/rkfl_checkout.js`, '');
-                    let par = paramsToJSON(search)
+            //     if (thisScript) {
+            //         clearInterval(scriptUrlInterval);
+            //         var script_url = thisScript.src;
+            //         let search = script_url.replace(`https://businesstosales.com/assets/js/rkfl_checkout.js`, '');
+            //         let par = paramsToJSON(search)
 
-                    RocketfuelPaymentEngine.hash = par['storeHash'];
-                    // hash = search.split('&')[0].split('=')[1]
-                    // console.log(hash,'search')
-                    // hash = hash.split('&')[0];
-                    await initUUID();
-                }
-            }, 2000);
+            //         RocketfuelPaymentEngine.hash = par['storeHash'];
+            //         // hash = search.split('&')[0].split('=')[1]
+            //         // console.log(hash,'search')
+            //         // hash = hash.split('&')[0];
+            //      
+            //     }
+            // }, 2000);
 
 
             let formChecklist = setInterval(() => {
@@ -471,6 +472,22 @@
                 }
 
             }, 2000)
+            let triggerBtn = setInterval(() => {
+
+
+
+                if (document.querySelector('.form-checklist.optimizedCheckout-form-checklist li input#radio-moneyorder')) {
+                    console.log('triggerBtn has been cleared for ')
+
+                    clearInterval(triggerBtn);
+
+                    console.log('add button listener')
+                    document.getElementById('checkout-payment-continue').addEventListener('click', handlePlaceOrderButton, false)
+
+                }
+
+            }, 2000)
+
 
         });
 
@@ -479,6 +496,18 @@
     if (currentPage.includes('order-confirmation')) {
 
         console.log("Order placed");
+        let result = localStorage.getItem('payment_complete_order_status_rocketfuel')
+
+        if (result && result !== 'bc-failed') {
+            let thankyouInter = setInterval(() => {
+                if (!document.querySelector('p[data-test=order-confirmation-order-status-text]')) return;
+                document.querySelector('p[data-test=order-confirmation-order-status-text]').innerHTML = 'Your order has been received'
+                document.querySelector('p[data-test=payment-instructions]').innerHTML = ''
+
+                clearInterval(thankyouInter)
+            }, 1000);
+
+        }
 
     }
 

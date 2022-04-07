@@ -96,7 +96,7 @@
                 console.log("Response from callback :", result, result?.status === undefined);
 
 
-                let status = "wc-on-hold";
+                let status = "bc-on-hold";
 
                 if (result?.status === undefined) {
                     return false;
@@ -105,17 +105,17 @@
                 let result_status = parseInt(result.status);
 
                 if (result_status === 101) {
-                    status = "wc-partial-payment";
+                    status = "bc-partial-payment";
                 }
 
                 if (result_status === 1 || result.status === "completed") {
 
-                    status = 'wc-processing';
+                    status = 'bc-processing';
 
                 }
 
                 if (result_status === -1) {
-                    status = "wc-failed";
+                    status = "bc-failed";
                 }
 
                 window.localStorage.setItem('payment_complete_order_status_rocketfuel', status);
@@ -474,7 +474,16 @@
     if (currentPage.includes('order-confirmation')) {
 
         console.log("Order placed");
+        let result = localStorage.getItem('payment_complete_order_status_rocketfuel')
 
+        if (result && result !== 'bc-failed') {
+            let thankyouInter = setInterval(() => {
+                if (!document.querySelector('p[data-test=order-confirmation-order-status-text]')) return;
+                document.querySelector('p[data-test=order-confirmation-order-status-text]').innerHTML = 'Your order has been received'
+                clearInterval(thankyouInter)
+            }, 1000);
+
+        }
     }
 
 
