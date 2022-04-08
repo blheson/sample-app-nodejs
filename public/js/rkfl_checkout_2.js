@@ -5,6 +5,8 @@
     var path = window.location.pathname;
     let currentPage = path.split('/').pop();
     var thisScript = document.currentScript;
+    // localStorage.removeItem('payment_complete_order_status_rocketfuel')
+
     function paramsToJSON(search) {
         var search = search.substring(1);
         return JSON.parse('{"' + decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g, '":"') + '"}')
@@ -88,7 +90,7 @@
 
             console.log('Trigger is calling');
 
-            document.getElementById('checkout-payment-continue').removeEventListener('click', handlePlaceOrderButton, false);
+
             document.getElementById('checkout-payment-continue').disabled = false;
             console.log("Event has been removed from button");
 
@@ -125,8 +127,7 @@
                 }
 
                 window.localStorage.setItem('payment_complete_order_status_rocketfuel', status);
-
-
+                document.getElementById('checkout-payment-continue').removeEventListener('click', handlePlaceOrderButton, false);
 
             } catch (error) {
 
@@ -155,7 +156,9 @@
         prepareRetrigger: function () {
 
             //show retrigger button
-
+            if (document.getElementById('rocketfuel_overlay_page_for_iframe')) {
+                document.getElementById('rocketfuel_overlay_page_for_iframe').remove();
+            }
             document.getElementById('checkout-payment-continue').disabled = false
 
 
@@ -175,6 +178,12 @@
                         }
                         break;
                     case 'rocketfuel_new_height':
+                        if (!document.getElementById('rocketfuel_overlay_page_for_iframe')) {
+                            let overlay = document.createElement('div')
+                            overlay.id = 'rocketfuel_overlay_page_for_iframe';
+                            overlay.style.cssText = "position: fixed;width: 100%;height: 100%;top: 0;"
+                            document.body.appendChild(overlay);
+                        }
 
                         engine.watchIframeShow = false;
 
@@ -414,7 +423,10 @@
     }
     function handlePlaceOrderButton(e) {
         console.log(e, "Evernt from handle place order");
-        document.getElementById('checkout-payment-continue').disabled = true
+
+        document.getElementById('checkout-payment-continue').disabled = true;
+
+        const rocketfuel_payment_status = localStorage.getItem('payment_complete_order_status_rocketfuel');
 
         e.preventDefault();
         RocketfuelPaymentEngine.init();
@@ -422,7 +434,9 @@
     function handleClick(e) {
 
         console.log(e.target.id, "e.target.id")
-
+        if (!e.target.id) {
+            return
+        }
         if (e.target.id === 'radio-moneyorder') {
 
             document.getElementById('checkout-payment-continue').addEventListener('click', handlePlaceOrderButton, false)
@@ -438,9 +452,19 @@
     }
 
     if (currentPage.includes('checkout')) {
-
+        let checkPlaceOrder = setInterval(() => {
+            if (document.getElementById('radio-moneyorder')) {
+                if (document.getElementById('radio-moneyorder').checked == true) {
+                    document.getElementById('checkout-payment-continue').disabled = true;
+                }
+                clearInterval(checkPlaceOrder);
+            }
+        }, 1000)
         document.addEventListener('DOMContentLoaded', async () => {
+
             await initUUID();
+            document.getElementById('checkout-payment-continue')?.disabled = false;
+
             // var scriptUrlInterval = setInterval(async function () {
 
             //     if (thisScript) {
@@ -478,9 +502,10 @@
 
                 if (document.querySelector('.form-checklist.optimizedCheckout-form-checklist li input#radio-moneyorder')) {
                     console.log('triggerBtn has been cleared for ')
+                    document.getElementById('checkout-payment-continue').disabled = false;
 
                     clearInterval(triggerBtn);
-
+                    document.querySelector('label[for=radio-moneyorder] span[data-test=payment-method-name]').innerText = 'Pay With Rocketfuel';
                     console.log('add button listener')
                     document.getElementById('checkout-payment-continue').addEventListener('click', handlePlaceOrderButton, false)
 
@@ -496,15 +521,48 @@
     if (currentPage.includes('order-confirmation')) {
 
         console.log("Order placed");
+        //  document.querySelector('p[data-test=order-confirmation-order-status-text]').innerHTML = 'Your order has been received';
         let result = localStorage.getItem('payment_complete_order_status_rocketfuel')
-
-        if (result && result !== 'bc-failed') {
+        //  document.querySelector('p[data-test=order-confirmation-order-status-text]').innerHTML = 'Your order has been received'
+        if (result) {
             let thankyouInter = setInterval(() => {
-                if (!document.querySelector('p[data-test=order-confirmation-order-status-text]')) return;
-                document.querySelector('p[data-test=order-confirmation-order-status-text]').innerHTML = 'Your order has been received'
-                document.querySelector('div[data-test=payment-instructions]').innerHTML = ''
 
-                clearInterval(thankyouInter)
+                if (!document.querySelector('p[data-test=order-confirmation-order-status-text]')) return;
+                document.querySelector('p[data-test=order-confirmation-order-status-text]').innerHTML = 'Your order has been received, An email will be sent containing information about your purchase.';
+                document.querySelector('div[data-test=payment-instructions]').innerHTML = '';
+
+                clearInterval(thankyouInter);
+
+                try {
+                    const temp_orderid_rocketfuel = localStorage.getItem("temp_orderid_rocketfuel");
+
+                    const order_id = document.querySelector('p[data-test=order-confirmation-order-number-text] strong');
+
+                    if (!order_id, !temp_orderid_rocketfuel) {
+                        console.log("could not retrieve", { order_id, temp_orderid_rocketfuel });
+                        return;
+                    }
+                    var myHeaders = new Headers();
+
+                    myHeaders.append("Content-Type", "application/json");
+
+                    const payload = {
+                        temporary_order_id: temp_orderid_rocketfuel,
+                        order_id
+                    }
+
+                    var requestOptions = {
+                        method: 'POST',
+                        headers: myHeaders,
+                        body: JSON.stringify(payload),
+
+                    };
+
+                    fetch(serverApiUrl + "/swap.php", requestOptions);
+
+                } catch (error) {
+
+                }
             }, 1000);
 
         }

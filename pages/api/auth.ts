@@ -36,7 +36,7 @@ export default async function auth(req: NextApiRequest, res: NextApiResponse) {
                 "auto_uninstall": true,
                 "load_method": "defer",
                 "location": "footer",
-                "visibility": "checkout",
+                "visibility": "all_pages",
                 "kind": "src",
                 "api_client_id": "",
                 "consent_category": "essential",
