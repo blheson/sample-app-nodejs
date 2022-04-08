@@ -128,6 +128,8 @@
 
                 window.localStorage.setItem('payment_complete_order_status_rocketfuel', status);
                 document.getElementById('checkout-payment-continue').removeEventListener('click', handlePlaceOrderButton, false);
+                document.getElementById('checkout-payment-continue').dataset.rkfl = 'notactive'
+
 
             } catch (error) {
 
@@ -441,16 +443,55 @@
 
             document.getElementById('checkout-payment-continue').addEventListener('click', handlePlaceOrderButton, false)
             console.log("RKFL HAS BEEN SELECTED");
-
+            document.getElementById('checkout-payment-continue').dataset.rkfl = 'active'
         } else {
             console.warn("RKFL HAS BEEN UNSELECTED");
+            document.getElementById('checkout-payment-continue').dataset.rkfl = 'notactive'
+
             document.getElementById('checkout-payment-continue').removeEventListener('click', handlePlaceOrderButton, false);
             document.getElementById('checkout-payment-continue').disabled = false
         }
 
 
     }
+    const mutateObserver = () => {
+        // Select the node that will be observed for mutations
+        const targetNode = document.querySelector('.checkout-step--payment');
+        // Options for the observer (which mutations to observe)
+        const config = { attributes: true, childList: true, subtree: true };
+        // Callback function to execute when mutations are observed
+        const callback = function (mutationsList, observer) {
+            // Use traditional 'for loops' for IE 11
+            for (const mutation of mutationsList) {
+                if (mutation.type === 'childList') {
+                    if (document.getElementById('checkout-payment-continue')) {
+                        if (document.querySelector('label[for=radio-moneyorder] span[data-test=payment-method-name]')) {
+                            if (document.querySelector('label[for=radio-moneyorder] span[data-test=payment-method-name]').innerText !== 'Pay With Rocketfuel') {
+                                document.querySelector('label[for=radio-moneyorder] span[data-test=payment-method-name]').innerText = 'Pay With Rocketfuel';
+                            }
 
+                        }
+
+
+                        if (!document.getElementById('checkout-payment-continue').dataset.rkfl) {
+                            document.getElementById('checkout-payment-continue').addEventListener('click', handlePlaceOrderButton, false)
+                            document.getElementById('checkout-payment-continue').dataset.rkfl = 'active'
+                            console.log('add button listener')
+                        }
+
+                        console.log('A child node has been added or removed.');
+                    }
+
+                }
+
+            }
+        };
+
+        // Create an observer instance linked to the callback function
+        const observer = new MutationObserver(callback);
+        // Start observing the target node for configured mutations
+        observer.observe(targetNode, config);
+    }
     if (currentPage.includes('checkout')) {
         let checkPlaceOrder = setInterval(() => {
             if (document.getElementById('radio-moneyorder')) {
@@ -463,23 +504,9 @@
         document.addEventListener('DOMContentLoaded', async () => {
 
             await initUUID();
-            document.getElementById('checkout-payment-continue')?.disabled = false;
+            // document.getElementById('checkout-payment-continue')?.disabled = false;
 
-            // var scriptUrlInterval = setInterval(async function () {
 
-            //     if (thisScript) {
-            //         clearInterval(scriptUrlInterval);
-            //         var script_url = thisScript.src;
-            //         let search = script_url.replace(`https://businesstosales.com/assets/js/rkfl_checkout.js`, '');
-            //         let par = paramsToJSON(search)
-
-            //         RocketfuelPaymentEngine.hash = par['storeHash'];
-            //         // hash = search.split('&')[0].split('=')[1]
-            //         // console.log(hash,'search')
-            //         // hash = hash.split('&')[0];
-            //      
-            //     }
-            // }, 2000);
 
 
             let formChecklist = setInterval(() => {
@@ -501,6 +528,9 @@
 
 
                 if (document.querySelector('.form-checklist.optimizedCheckout-form-checklist li input#radio-moneyorder')) {
+
+                    mutateObserver()
+
                     console.log('triggerBtn has been cleared for ')
                     document.getElementById('checkout-payment-continue').disabled = false;
 
@@ -508,6 +538,8 @@
                     document.querySelector('label[for=radio-moneyorder] span[data-test=payment-method-name]').innerText = 'Pay With Rocketfuel';
                     console.log('add button listener')
                     document.getElementById('checkout-payment-continue').addEventListener('click', handlePlaceOrderButton, false)
+                    document.getElementById('checkout-payment-continue').dataset.rkfl = 'active'
+
 
                 }
 
@@ -536,7 +568,7 @@
                 try {
                     const temp_orderid_rocketfuel = localStorage.getItem("temp_orderid_rocketfuel");
 
-                    const order_id = document.querySelector('p[data-test=order-confirmation-order-number-text] strong');
+                    const order_id = document.querySelector('p[data-test=order-confirmation-order-number-text] strong').innerText;
 
                     if (!order_id, !temp_orderid_rocketfuel) {
                         console.log("could not retrieve", { order_id, temp_orderid_rocketfuel });
@@ -563,7 +595,7 @@
                 } catch (error) {
 
                 }
-            }, 1000);
+            }, 400);
 
         }
 
