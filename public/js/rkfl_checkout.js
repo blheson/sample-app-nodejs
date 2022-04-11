@@ -12,8 +12,6 @@
 
 
 
-
-    // necessary infor include
     // merchant auth, uuid
     /**
      * Payment Engine object
