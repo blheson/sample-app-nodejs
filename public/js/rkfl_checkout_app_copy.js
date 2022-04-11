@@ -1,3 +1,4 @@
+
 (() => {
     var serverApiUrl = 'https://bigcommerce.rocketfuelblockchain.com';
     // var serverApiUrl = 'https://df4d-102-89-33-196.ngrok.io';
@@ -20,7 +21,7 @@
 
         order_id: '',
         url: new URL(window.location.href),
-        hash: '',
+        hash: 'v2w0dnb99p',
         watchIframeShow: false,
         rkflConfig: null,
         user_data: {
@@ -454,9 +455,9 @@
         observer.observe(targetNode, config);
     }
     function enableButton(status) {
-        if (!document.getElementById('checkout-payment-continue')) return;
+        if(!document.getElementById('checkout-payment-continue')) return;
         if (status && document.getElementById('checkout-payment-continue')) {
-
+           
             console.log('Enabling buton')
 
             document.getElementById('checkout-payment-continue').disabled = false;
@@ -467,17 +468,13 @@
         }
     }
     if (currentPage.includes('checkout')) {
-
         localStorage.removeItem('temp_orderid_rocketfuel');
-
         let checkPlaceOrder = setInterval(() => {
             if (document.getElementById('radio-moneyorder')) {
-                
-                console.log('Disabling');
+              
 
                 if (document.getElementById('radio-moneyorder').checked == true) {
                     enableButton(false);
-
                 }
                 clearInterval(checkPlaceOrder);
             }
@@ -492,32 +489,15 @@
                 clearInterval(fixIframe);
             }
         }, 1000);
-
-
+        
         document.addEventListener('DOMContentLoaded', async () => {
-            var scriptUrlInterval = setInterval(async function () {
 
-                if (thisScript) {
-                    clearInterval(scriptUrlInterval);
-                    var script_url = thisScript.src;
-                    let search = script_url.replace(serverApiUrl + `/js/rkfl_checkout.js`, '');
-                    let par = paramsToJSON(search)
-                    console.log("par['storeHash']", par['storeHash'])
-                    RocketfuelPaymentEngine.hash = par['storeHash'];
-                    // hash = search.split('&')[0].split('=')[1]
-                    // console.log(hash,'search')
-                    // hash = hash.split('&')[0];
-                    await initUUID();
 
-                    enableButton(true);
-
-                }
-            }, 2000);
-
+            await initUUID();
+            console.log("Rocketfuel now ready----->");
+            enableButton(true);
 
             let formChecklist = setInterval(() => {
-
-
 
                 if (document.querySelector('.form-checklist.optimizedCheckout-form-checklist')) {
                     console.log('Interval has been cleared for ')
@@ -537,9 +517,8 @@
                     mutateObserver()
 
                     console.log('triggerBtn has been cleared for ');
+
                     enableButton(true);
-
-
 
                     clearInterval(triggerBtn);
                     // document.querySelector('label[for=radio-moneyorder] span[data-test=payment-method-name]').innerText = 'Pay With Rocketfuel';
