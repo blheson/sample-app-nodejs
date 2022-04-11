@@ -455,13 +455,18 @@
         observer.observe(targetNode, config);
     }
     function enableButton(status) {
-        if(!document.getElementById('checkout-payment-continue')) return;
+        if (!document.getElementById('checkout-payment-continue')) return;
         if (status && document.getElementById('checkout-payment-continue')) {
-           
+            
             console.log('Enabling buton')
 
             document.getElementById('checkout-payment-continue').disabled = false;
         } else {
+            if (RocketfuelPaymentEngine.response.uuid) {// if we have uuid, no need to disabled
+            console.log('We have UUID, no buton disabling')
+
+                return;
+            }
             console.log('Disabling buton')
             document.getElementById('checkout-payment-continue').disabled = true;
 
@@ -471,9 +476,10 @@
         localStorage.removeItem('temp_orderid_rocketfuel');
         let checkPlaceOrder = setInterval(() => {
             if (document.getElementById('radio-moneyorder')) {
-              
+
 
                 if (document.getElementById('radio-moneyorder').checked == true) {
+                   
                     enableButton(false);
                 }
                 clearInterval(checkPlaceOrder);
@@ -489,7 +495,7 @@
                 clearInterval(fixIframe);
             }
         }, 1000);
-        
+
         document.addEventListener('DOMContentLoaded', async () => {
 
 

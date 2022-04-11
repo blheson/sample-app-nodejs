@@ -210,7 +210,7 @@
                     }
 
                     try {
-                        console.log('details', userData.email, localStorage.getItem('rkfl_email'), payload);
+                       
 
                         if (userData.email !== localStorage.getItem('rkfl_email')) { //remove signon details when email is different
                             localStorage.removeItem('rkfl_token');
@@ -331,14 +331,14 @@
             let response = await fetch(rootUrl + "/api/storefront/carts", requestOptions);
 
             let result = await response.text();
-            console.log('Result from carts: ', result);
+      
             result = JSON.parse(result);
 
             let theIndex = result[0];
             let cart;
 
             if (theIndex && theIndex.id) {
-                console.log('Result from carts parsed: ', theIndex.id);
+         
                 RocketfuelPaymentEngine.user_data.email = theIndex.email;
                 cart = sortCart(theIndex.lineItems);
 
@@ -388,8 +388,6 @@
 
     }
     function handlePlaceOrderButton(e) {
-        console.log(e, "Event from handle place order");
-
 
         e.preventDefault();
         RocketfuelPaymentEngine.init();
@@ -461,6 +459,11 @@
 
             document.getElementById('checkout-payment-continue').disabled = false;
         } else {
+            if (RocketfuelPaymentEngine.response.uuid) {// if we have uuid, no need to disabled
+                console.log('We have UUID, no buton disabling')
+    
+                    return;
+                }
             console.log('Disabling buton')
             document.getElementById('checkout-payment-continue').disabled = true;
 
