@@ -1,6 +1,7 @@
 import * as mysql from 'mysql';
 import { promisify } from 'util';
 import { MerchantData,SessionProps, StoreData  } from '../../types';
+import 'dotenv/config';
 
 const MYSQL_CONFIG = {
     host: process.env.MYSQL_HOST,

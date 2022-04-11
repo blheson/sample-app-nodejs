@@ -41,19 +41,19 @@ export default async function merchant(req: NextApiRequest, res: NextApiResponse
                     return;
                 }
 
-
+                const temporaryOrderId = new Date().getTime() + new Date().getTime().toString().substring(1, 4);
                 const data = {
                     'amount': body.amount.toString(),
                     'currency': body.currency,
-                    'orderId': body.orderId || new Date().getTime() + new Date().getTime().toString().substring(1, 4),
+                    'orderId': temporaryOrderId,
                     'cart': body.cart,
                     'storeHash': body.storeHash,
                     'redirectUrl': ''
                 }
 
-                const { uuid, merchantAuth,environment } = await getUUID(data);
-                const result = { uuid, merchantAuth: Buffer.from(merchantAuth).toString("base64"),environment };
-               
+                const { uuid, merchantAuth, environment } = await getUUID(data);
+                const result = { uuid, merchantAuth, environment, temporaryOrderId };
+
                 // const bigcommerce = bigcommerceClient(accessToken, storeHash);
 
                 // const merchantData = await getMerchantData(req);

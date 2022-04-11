@@ -1,10 +1,21 @@
 (() => {
-
     var serverApiUrl = 'https://rkfl-bigcommerce.herokuapp.com';
-    
+
+
     var path = window.location.pathname;
     let currentPage = path.split('/').pop();
     var thisScript = document.currentScript;
+    // localStorage.removeItem('payment_complete_order_status_rocketfuel')
+
+
+    function paramsToJSON(search) {
+        var search = search.substring(1);
+        return JSON.parse('{"' + decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g, '":"') + '"}')
+    }
+
+
+
+
     // necessary infor include
     // merchant auth, uuid
     /**
@@ -14,6 +25,7 @@
 
         order_id: '',
         url: new URL(window.location.href),
+        hash: '',
         watchIframeShow: false,
         rkflConfig: null,
         user_data: {
@@ -28,53 +40,28 @@
 
                 if (document.querySelector('#radio-moneyorder')) {
 
-                    document.querySelector('#radio-moneyorder').parentElement.querySelector('label .paymentProviderHeader-cc').innerHTML = '<div id="rocketfuel_payment" class="rocketfuel_payment">Click to pay</div>';
 
-
-                    document.querySelector(".rocketfuel_payment").addEventListener('click', (e) => {
-
-
-                        RocketfuelPaymentEngine.init();
-
-                    })
                     clearInterval(checkIframe);
                 }
 
             }, 500);
 
         },
-        getUUID: async function () {
 
-            let result = {
-                data: {
-                    temporary_order_id: new Date().getTime() + '_' + Math.floor(Math.random() * 999),
-
-                    uuid: '5ae7a2f6-d10c-4491-80ea-1672147067fd'
-
-                }
-            }
-            RocketfuelPaymentEngine.order_id = result.data.temporary_order_id;
-
-            window.localStorage.setItem('temp_orderid_rocketfuel', result.data.temporary_order_id);
-
-            console.log("res", result.data.uuid);
-
-            return result.data.uuid;
-
-        },
         getEnvironment: function () {
-            return 'prod';
+            return RocketfuelPaymentEngine.response?.environment || 'stage2';
         },
         getUserData: function () {
 
 
-            let email = RocketfuelPaymentEngine.user_data.email || validateEmail(document.querySelector('.customerView-body.optimizedCheckout-contentPrimary').innerText) ? document.querySelector('.customerView-body.optimizedCheckout-contentPrimary').innerText : null;
-
+            let email = RocketfuelPaymentEngine.user_data.email || document.querySelector('.customerView-body.optimizedCheckout-contentPrimary')?.innerText || null;
+            const merchantAuth = 'Z+ASsXb/1puWbNxU20jRVtegmZmMg9MtJMAY4h9a/K5vVVvfnDd2LN42fGlOgkq4iKnDFiqF/juYKFNV8YrOht7Y9Qjtamz9cJHhVdqtlabnBIFJCPefHb6FD2ZpQt7qfPTd9LBg15mkndTvq9WoVWvwj7spSHAwXgw1VVGL1ByICVG7AKHZJef6wLX08muTgcOkkLjS8cI00YCoCWqziXgEIJ6fssgFQby6dr6+vTccAgIamt/OHZ1VIqHdXwunv/ai/rPOPrBVhee9KXNDBOUy2n5F+M18itNbvIKvi4oiMU27QohM1hHvwXQLlU3xY4rCLr/kps4NlkwqdeomDg=='; //qa 2335689b-7a4d-420a-9cc0-f5d765a96967
+            // const merchantAuth = 'TNc/qaLPSX+al57l7jKkmKz2nPNzJXowAK0AlBwFNTLXdjh0OD74SyqhOTXlM+JA3O1LsxgH0Jm+Z9Rs5nulVI5uGveycWbPsBj912bv8tbuFTUJlgDGZk9mxnZ4lZWNKCusFxuILRJ9qMjJSFB16AeFkI1hVVvEH3tfnEDdx5bcZFDFyEGD1F0P/Lwg0Vvo4gKqKfbaptH5pgX35iXomXC8HvTQyDVIZWi4wa52PYZr0Ws0Jgb7NcNSqHmoviQr8889SOrsWMjeu7YsDpPFEsgx+Knox5+IfFfj1OwpqflzxShtKvepjCxFfnBoV09BP230h/+/zmTkhs7yaTytew=='//merchant test prod 75e5cc4e-fad4-45b2-96d5-9dfea2ccb744
             let user_data = {
-                first_name: document.querySelector('.first-name')?.innerText || null,
-                last_name: document.querySelector('.family-name')?.innerText || null,
+                firstName: document.querySelector('.first-name')?.innerText || null,
+                lastName: document.querySelector('.family-name')?.innerText || null,
                 email,
-                merchant_auth: 'TNc/qaLPSX+al57l7jKkmKz2nPNzJXowAK0AlBwFNTLXdjh0OD74SyqhOTXlM+JA3O1LsxgH0Jm+Z9Rs5nulVI5uGveycWbPsBj912bv8tbuFTUJlgDGZk9mxnZ4lZWNKCusFxuILRJ9qMjJSFB16AeFkI1hVVvEH3tfnEDdx5bcZFDFyEGD1F0P/Lwg0Vvo4gKqKfbaptH5pgX35iXomXC8HvTQyDVIZWi4wa52PYZr0Ws0Jgb7NcNSqHmoviQr8889SOrsWMjeu7YsDpPFEsgx+Knox5+IfFfj1OwpqflzxShtKvepjCxFfnBoV09BP230h/+/zmTkhs7yaTytew=='
+                merchantAuth
             }
 
             if (!user_data) return false;
@@ -82,13 +69,25 @@
             return user_data;
 
         },
+        triggerPlaceOrder: function () {
+
+            console.log('Trigger is calling');
+
+
+            document.getElementById('checkout-payment-continue').disabled = false;
+            console.log("Event has been removed from button");
+
+            document.getElementById('checkout-payment-continue').click();
+            console.log("Place order triggered");
+            console.log('Trigger has neen called ');
+        },
         updateOrder: function (result) {
             try {
 
                 console.log("Response from callback :", result, result?.status === undefined);
 
 
-                let status = "wc-on-hold";
+                let status = "bc-failed";
 
                 if (result?.status === undefined) {
                     return false;
@@ -97,24 +96,24 @@
                 let result_status = parseInt(result.status);
 
                 if (result_status === 101) {
-                    status = "wc-partial-payment";
+                    status = "bc-partial-payment";
                 }
 
-                if (result_status === 1 || result.status === "completed") {
+                if (result_status === 1 || result.status === "completed" || result.status === 0) {
 
-                    status = 'wc-processing';
+                    status = 'bc-processing';
 
                 }
 
                 if (result_status === -1) {
-                    status = "wc-failed";
+                    status = "bc-failed";
                 }
 
                 window.localStorage.setItem('payment_complete_order_status_rocketfuel', status);
-
                 document.getElementById('checkout-payment-continue').removeEventListener('click', handlePlaceOrderButton, false);
+                document.getElementById('checkout-payment-continue').dataset.rkfl = 'notactive'
 
-                document.getElementById('checkout-payment-continue').click();
+
             } catch (error) {
 
                 console.error('Error from update order method', error);
@@ -125,10 +124,9 @@
 
         startPayment: function (autoTriggerState = true) {
 
-            // document.getElementById('rocketfuel_payment').innerText = "Preparing Payment window...";
+
             this.watchIframeShow = true;
 
-            document.getElementById('rocketfuel_payment').disabled = true;
 
             let checkIframe = setInterval(() => {
 
@@ -143,16 +141,14 @@
         prepareRetrigger: function () {
 
             //show retrigger button
-            document.getElementById('rocketfuel_payment').disabled = false;
+            if (document.getElementById('rocketfuel_overlay_page_for_iframe')) {
+                document.getElementById('rocketfuel_overlay_page_for_iframe').remove();
+            }
+            document.getElementById('checkout-payment-continue').disabled = false
 
 
         },
-        prepareProgressMessage: function () {
 
-            //revert trigger button message
-            document.getElementById('rocketfuel_payment').disabled = true;
-
-        },
 
         windowListener: function () {
             let engine = this;
@@ -162,9 +158,18 @@
                 switch (event.data.type) {
                     case 'rocketfuel_iframe_close':
                         engine.prepareRetrigger();
+                        if (event.data.paymentCompleted === 1) {
+                            engine.triggerPlaceOrder();
+                        }
                         break;
                     case 'rocketfuel_new_height':
-                        engine.prepareProgressMessage();
+                        if (!document.getElementById('rocketfuel_overlay_page_for_iframe')) {
+                            let overlay = document.createElement('div')
+                            overlay.id = 'rocketfuel_overlay_page_for_iframe';
+                            overlay.style.cssText = "position: fixed;width: 100%;height: 100%;top: 0;"
+                            document.body.appendChild(overlay);
+                        }
+
                         engine.watchIframeShow = false;
 
                     case 'rocketfuel_result_ok':
@@ -181,6 +186,7 @@
             })
         },
         setLocalStorage: function (key, value) {
+            console.log({ key, value });
             localStorage.setItem(key, value);
         },
         initRocketFuel: async function () {
@@ -200,8 +206,8 @@
                     environment: RocketfuelPaymentEngine.getEnvironment()
                 });
 
-                // let uuid = await this.getUUID(); //set uuid
-                let uuid = await this.response.uuid; //set uuid
+
+                let uuid = this.response.uuid; //set uuid
 
                 RocketfuelPaymentEngine.rkflConfig = {
                     uuid,
@@ -209,12 +215,12 @@
                     environment: RocketfuelPaymentEngine.getEnvironment()
                 }
 
-                if (userData.first_name && userData.email) {
+                if (userData.firstName && userData.email) {
                     payload = {
-                        firstName: userData.first_name,
-                        lastName: userData.last_name,
+                        firstName: userData.firstName,
+                        lastName: userData.lastName,
                         email: userData.email,
-                        merchantAuth: userData.merchant_auth,
+                        merchantAuth: userData.merchantAuth,
                         kycType: 'null',
                         kycDetails: {
                             'DOB': "01-01-1990"
@@ -298,21 +304,7 @@
 
         }
     }
-    function paramsToJSON(search) {
-        var search = search.substring(1);
-        return JSON.parse('{"' + decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g, '":"') + '"}')
-    }
 
-    var hash = '';
-
-    var script_url_interval = setInterval(function () {
-        if (thisScript) {
-            clearInterval(script_url_interval);
-            var script_url = thisScript.src;
-            let search = script_url.replace(`https://businesstosales.com/assets/js/rkfl_checkout.js`, '');
-            hash = paramsToJSON(search)['store_hash'];
-        }
-    }, 2000);
 
     function sortIndividual(items) {
         return items.map(item => {
@@ -344,9 +336,9 @@
 
     }
     async function initUUID() {
-        await RocketfuelPaymentEngine.loadButtonRkfl();
+        // await RocketfuelPaymentEngine.loadButtonRkfl();
 
-        console.log('Button loaded');
+        // console.log('Button loaded');
 
         var requestOptions = {
             method: 'GET',
@@ -375,10 +367,10 @@
                     currency: theIndex.currency.code,
                     cart,
                     amount: theIndex.baseAmount,
-                    storeHash: hash
+                    storeHash: RocketfuelPaymentEngine.hash
                 }
 
-                console.log('Sorted Cart ', cart);
+                console.log('Sorted Cart ', cart, RocketfuelPaymentEngine.hash);
                 //Get UUID here
                 //fetch here
                 var myHeaders = new Headers();
@@ -389,21 +381,23 @@
                     method: 'POST',
                     headers: myHeaders,
                     body: JSON.stringify(payload),
-                    redirect: 'follow'
+
                 };
 
-                // let uuidResponse = await fetch(serverApiUrl + "/api/payment", requestOptions);
                 let uuidResponse = await fetch(serverApiUrl + "/payment.php", requestOptions);
 
 
 
-                let uuidResult = await uuidResponse.text();
-                console.log('Parse result: ', JSON.parse(uuidResult));
+                let uuidResult = await uuidResponse.json();
+
+                console.log('Parse result: ', uuidResult);
 
                 //response here
                 //set localstorage
-                RocketfuelPaymentEngine.response = JSON.parse(uuidResult)
+                RocketfuelPaymentEngine.response = uuidResult
 
+                RocketfuelPaymentEngine.setLocalStorage('temp_orderid_rocketfuel', RocketfuelPaymentEngine.response.temporary_order_id)
+                // temp_orderid_rocketfuel
 
                 console.log('Engin response ', RocketfuelPaymentEngine.response);
 
@@ -417,47 +411,126 @@
     }
     function handlePlaceOrderButton(e) {
         console.log(e, "Evernt from handle place order");
-        document.getElementById('checkout-payment-continue').disabled = true
 
         e.preventDefault();
         RocketfuelPaymentEngine.init();
     }
     function handleClick(e) {
 
+        console.log(e.target.id, "e.target.id")
+        if (!e.target.id) {
+            return
+        }
         if (e.target.id === 'radio-moneyorder') {
 
             document.getElementById('checkout-payment-continue').addEventListener('click', handlePlaceOrderButton, false)
             console.log("RKFL HAS BEEN SELECTED");
-
+            document.getElementById('checkout-payment-continue').dataset.rkfl = 'active'
         } else {
             console.warn("RKFL HAS BEEN UNSELECTED");
+            document.getElementById('checkout-payment-continue').dataset.rkfl = 'notactive'
+
             document.getElementById('checkout-payment-continue').removeEventListener('click', handlePlaceOrderButton, false);
             document.getElementById('checkout-payment-continue').disabled = false
         }
 
 
     }
+    const mutateObserver = () => {
+        // Select the node that will be observed for mutations
+        const targetNode = document.querySelector('.checkout-step--payment');
+        // Options for the observer (which mutations to observe)
+        const config = { attributes: true, childList: true, subtree: true };
+        // Callback function to execute when mutations are observed
+        const callback = function (mutationsList, observer) {
+            // Use traditional 'for loops' for IE 11
+            for (const mutation of mutationsList) {
+                if (mutation.type === 'childList') {
+                    if (document.getElementById('checkout-payment-continue')) {
+                        // if (document.querySelector('label[for=radio-moneyorder] span[data-test=payment-method-name]')) {
+                        //     if (document.querySelector('label[for=radio-moneyorder] span[data-test=payment-method-name]').innerText !== 'Pay With Rocketfuel') {
+                        //         document.querySelector('label[for=radio-moneyorder] span[data-test=payment-method-name]').innerText = 'Pay With Rocketfuel';
+                        //     }
 
+                        // }
+
+
+                        if (!document.getElementById('checkout-payment-continue').dataset.rkfl) {
+                            document.getElementById('checkout-payment-continue').addEventListener('click', handlePlaceOrderButton, false)
+                            document.getElementById('checkout-payment-continue').dataset.rkfl = 'active'
+                            console.log('add button listener')
+                        }
+
+                        console.log('A child node has been added or removed.');
+                    }
+
+                }
+
+            }
+        };
+
+        // Create an observer instance linked to the callback function
+        const observer = new MutationObserver(callback);
+        // Start observing the target node for configured mutations
+        observer.observe(targetNode, config);
+    }
     if (currentPage.includes('checkout')) {
-
+        localStorage.removeItem('temp_orderid_rocketfuel');
+        let checkPlaceOrder = setInterval(() => {
+            if (document.getElementById('radio-moneyorder')) {
+                if (document.getElementById('radio-moneyorder').checked == true) {
+                    document.getElementById('checkout-payment-continue').disabled = true;
+                }
+                clearInterval(checkPlaceOrder);
+            }
+        }, 1000)
         document.addEventListener('DOMContentLoaded', async () => {
 
             await initUUID();
 
+            if (document.getElementById('checkout-payment-continue')) {
+                document.getElementById('checkout-payment-continue').disabled = false;
+            }
+
+
             let formChecklist = setInterval(() => {
 
-                console.log('Checking for ')
+
 
                 if (document.querySelector('.form-checklist.optimizedCheckout-form-checklist')) {
                     console.log('Interval has been cleared for ')
 
                     clearInterval(formChecklist);
-
+                    if (document.getElementById('checkout-payment-continue')) {
+                        document.getElementById('checkout-payment-continue').disabled = false;
+                    }
                     document.querySelector('.form-checklist.optimizedCheckout-form-checklist').addEventListener('click', handleClick, false);
 
                 }
 
             }, 2000)
+            let triggerBtn = setInterval(() => {
+
+
+
+                if (document.querySelector('.form-checklist.optimizedCheckout-form-checklist li input#radio-moneyorder')) {
+
+                    mutateObserver()
+
+                    console.log('triggerBtn has been cleared for ')
+                    document.getElementById('checkout-payment-continue').disabled = false;
+
+                    clearInterval(triggerBtn);
+                    // document.querySelector('label[for=radio-moneyorder] span[data-test=payment-method-name]').innerText = 'Pay With Rocketfuel';
+                    console.log('add button listener')
+                    document.getElementById('checkout-payment-continue').addEventListener('click', handlePlaceOrderButton, false)
+                    document.getElementById('checkout-payment-continue').dataset.rkfl = 'active'
+
+
+                }
+
+            }, 2000)
+
 
         });
 
@@ -466,6 +539,51 @@
     if (currentPage.includes('order-confirmation')) {
 
         console.log("Order placed");
+        //  document.querySelector('p[data-test=order-confirmation-order-status-text]').innerHTML = 'Your order has been received';
+        let result = localStorage.getItem('payment_complete_order_status_rocketfuel')
+        //  document.querySelector('p[data-test=order-confirmation-order-status-text]').innerHTML = 'Your order has been received'
+        if (result) {
+            let thankyouInter = setInterval(() => {
+
+                if (!document.querySelector('p[data-test=order-confirmation-order-status-text]')) return;
+                document.querySelector('p[data-test=order-confirmation-order-status-text]').innerHTML = 'Your order has been received, An email will be sent containing information about your purchase.';
+                document.querySelector('div[data-test=payment-instructions]').innerHTML = '';
+
+                clearInterval(thankyouInter);
+
+                try {
+                    const temp_orderid_rocketfuel = localStorage.getItem("temp_orderid_rocketfuel");
+
+                    const order_id = document.querySelector('p[data-test=order-confirmation-order-number-text] strong').innerText;
+
+                    if (!order_id, !temp_orderid_rocketfuel) {
+                        console.log("could not retrieve", { order_id, temp_orderid_rocketfuel });
+                        return;
+                    }
+                    var myHeaders = new Headers();
+
+                    myHeaders.append("Content-Type", "application/json");
+
+                    const payload = {
+                        temporary_order_id: temp_orderid_rocketfuel,
+                        order_id
+                    }
+
+                    var requestOptions = {
+                        method: 'POST',
+                        headers: myHeaders,
+                        body: JSON.stringify(payload),
+
+                    };
+
+                    fetch(serverApiUrl + "/swap.php", requestOptions);
+
+                } catch (error) {
+
+                }
+            }, 400);
+
+        }
 
     }
 
