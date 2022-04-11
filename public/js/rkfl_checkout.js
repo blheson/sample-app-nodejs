@@ -1,5 +1,5 @@
 (() => {
-    var serverApiUrl =  window.location.origin || 'https://bigcommerce.rocketfuelblockchain.com' ;
+    var serverApiUrl =  'https://bigcommerce.rocketfuelblockchain.com' ;
     // var serverApiUrl = 'https://df4d-102-89-33-196.ngrok.io';
 
     var path = window.location.pathname;

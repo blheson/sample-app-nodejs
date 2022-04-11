@@ -1,0 +1,29 @@
+# Get the Client ID and Secret from the Developer Portal
+# https://developer.bigcommerce.com/api-docs/apps/quick-start#register-a-draft-app
+
+CLIENT_ID=954gmseluvgcuj3pqjdi4t9c1a6pzls
+CLIENT_SECRET=2cea62ce9e0e42a412d18615ed3344efad438a9b31d478f9c1d8e34bbf585ea6
+
+# Test locally with ngrok
+# https://developer.bigcommerce.com/api-docs/apps/guide/development#testing-locally-with-ngrok
+
+AUTH_CALLBACK= https://df4d-102-89-33-196.ngrok.io/api/auth
+APP_URL= https://df4d-102-89-33-196.ngrok.io
+# Replace jwt key with a 32+ random character secret
+SCRIPT_CHECKOUT = https://df4d-102-89-33-196.ngrok.io/js/rkfl_checkout.js
+RKFL_SDK = https://d3rpjm0wf8u2co.cloudfront.net/static/rkfl.js
+JWT_KEY=d2VzdXN1ampqamplc3NrZGtra2Rra2Qs
+
+# Specify the type of database
+DB_TYPE=mysql
+
+# nmpx4uvgsy
+# https://bigcommerce.paystackintegrations.com/js/script.js?store_hash=xsv4d769d2.
+# If using mysql, enter your config here
+
+MYSQL_HOST=localhost
+MYSQL_DATABASE=rkfl-bigcommerce
+MYSQL_USERNAME=root
+MYSQL_PASSWORD=
+MYSQL_PORT=
+PUBLIC_KEY="-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA2e4stIYooUrKHVQmwztC\n/l0YktX6uz4bE1iDtA2qu4OaXx+IKkwBWa0hO2mzv6dAoawyzxa2jmN01vrpMkMj\nrB+Dxmoq7tRvRTx1hXzZWaKuv37BAYosOIKjom8S8axM1j6zPkX1zpMLE8ys3dUX\nFN5Dl/kBfeCTwGRV4PZjP4a+QwgFRzZVVfnpcRI/O6zhfkdlRah8MrAPWYSoGBpG\nCPiAjUeHO/4JA5zZ6IdfZuy/DKxbcOlt9H+z14iJwB7eVUByoeCE+Bkw+QE4msKs\naIn4xl9GBoyfDZKajTzL50W/oeoE1UcuvVfaULZ9DWnHOy6idCFH1WbYDxYYIWLi\nAQIDAQAB\n-----END PUBLIC KEY-----"
