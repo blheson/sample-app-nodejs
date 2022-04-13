@@ -1,10 +1,10 @@
-
 (() => {
     var serverApiUrl = 'https://bigcommerce.rocketfuelblockchain.com';
     // var serverApiUrl = 'https://df4d-102-89-33-196.ngrok.io';
 
     var path = window.location.pathname;
     let currentPage = path.split('/').pop();
+
     var thisScript = document.currentScript;
     function paramsToJSON(search) {
         search = search.substring(1);
@@ -24,9 +24,11 @@
         hash: 'v2w0dnb99p',
         watchIframeShow: false,
         rkflConfig: null,
+        buttonEventAdded: false,
         user_data: {
             email: null
         },
+        loading: false,
         response: {
             uuid: '',
             temporary_order_id: ''
@@ -39,7 +41,7 @@
         getUserData: function () {
 
 
-            let email = RocketfuelPaymentEngine.user_data.email || document.querySelector('.customerView-body.optimizedCheckout-contentPrimary')?.innerText || null;
+            let email = document.querySelector('.customerView-body.optimizedCheckout-contentPrimary')?.innerText || null;
 
             let user_data = {
                 firstName: document.querySelector('.first-name')?.innerText || null,
@@ -92,6 +94,8 @@
                 window.localStorage.setItem('payment_complete_order_status_rocketfuel', status);
 
                 document.getElementById('checkout-payment-continue').removeEventListener('click', handlePlaceOrderButton, false);
+                RocketfuelPaymentEngine.buttonEventAdded = false;
+
                 document.getElementById('checkout-payment-continue').dataset.rkfl = 'notactive'
                 // document.getElementById('checkout-payment-continue').click();
             } catch (error) {
@@ -139,6 +143,7 @@
 
                 switch (event.data.type) {
                     case 'rocketfuel_iframe_close':
+                        RocketfuelPaymentEngine.loading = false;
                         engine.prepareRetrigger();
                         if (event.data.paymentCompleted === 1) {
                             engine.triggerPlaceOrder();
@@ -211,6 +216,7 @@
                     }
 
                     try {
+                        console.log("The user data", userData);
                         console.log('details', userData.email, localStorage.getItem('rkfl_email'), payload);
 
                         if (userData.email !== localStorage.getItem('rkfl_email')) { //remove signon details when email is different
@@ -269,7 +275,7 @@
             try {
 
                 let res = await engine.initRocketFuel();
-                console.log(res);
+            
 
             } catch (error) {
 
@@ -389,10 +395,18 @@
 
     }
     function handlePlaceOrderButton(e) {
-        console.log(e, "Event from handle place order");
-
 
         e.preventDefault();
+
+        console.log("Defailt prevented");
+
+        console.log("Loading status", RocketfuelPaymentEngine.loading);
+
+        if (RocketfuelPaymentEngine.loading === true)
+            return
+        RocketfuelPaymentEngine.loading = true;
+        console.log("Loading set to", RocketfuelPaymentEngine.loading)
+
         RocketfuelPaymentEngine.init();
     }
     function handleClick(e) {
@@ -403,14 +417,20 @@
         if (e.target.id === 'radio-moneyorder') {
 
             document.getElementById('checkout-payment-continue').addEventListener('click', handlePlaceOrderButton, false)
+            RocketfuelPaymentEngine.buttonEventAdded = true;
             console.log("RKFL HAS BEEN SELECTED");
+
             document.getElementById('checkout-payment-continue').dataset.rkfl = 'active'
 
         } else {
+
             console.warn("RKFL HAS BEEN UNSELECTED");
+
             document.getElementById('checkout-payment-continue').dataset.rkfl = 'notactive'
 
             document.getElementById('checkout-payment-continue').removeEventListener('click', handlePlaceOrderButton, false);
+            RocketfuelPaymentEngine.buttonEventAdded = false;
+
             document.getElementById('checkout-payment-continue').disabled = false
         }
 
@@ -437,6 +457,8 @@
 
                         if (!document.getElementById('checkout-payment-continue').dataset.rkfl) {
                             document.getElementById('checkout-payment-continue').addEventListener('click', handlePlaceOrderButton, false)
+                            RocketfuelPaymentEngine.buttonEventAdded = true;
+
                             document.getElementById('checkout-payment-continue').dataset.rkfl = 'active'
                             console.log('add button listener')
                         }
@@ -457,17 +479,22 @@
     function enableButton(status) {
         if (!document.getElementById('checkout-payment-continue')) return;
         if (status && document.getElementById('checkout-payment-continue')) {
-            
-            console.log('Enabling buton')
+            setTimeout(() => {
 
-            document.getElementById('checkout-payment-continue').disabled = false;
+                if (RocketfuelPaymentEngine.loading === true) return;
+                console.log('Enabling buton')
+                document.getElementById('checkout-payment-continue').disabled = false;
+            }, 2000)
+
         } else {
-            if (RocketfuelPaymentEngine.response.uuid) {// if we have uuid, no need to disabled
-            console.log('We have UUID, no buton disabling')
+
+
+            if (RocketfuelPaymentEngine.response.uuid && RocketfuelPaymentEngine.buttonEventAdded === true) {// if we have uuid, no need to disabled
+                console.log('We have UUID, no buton disabling and even has been added ')
 
                 return;
             }
-            console.log('Disabling buton')
+            console.log('Disabling buton');
             document.getElementById('checkout-payment-continue').disabled = true;
 
         }
@@ -479,7 +506,6 @@
 
 
                 if (document.getElementById('radio-moneyorder').checked == true) {
-                   
                     enableButton(false);
                 }
                 clearInterval(checkPlaceOrder);
@@ -488,7 +514,7 @@
 
         let fixIframe = setInterval(() => {
             if (document.getElementById('iframeWrapper')) {
-                console.log('Disabling')
+
 
                 document.getElementById('iframeWrapper').style.position = 'fixed';
 
@@ -501,15 +527,15 @@
 
             await initUUID();
             console.log("Rocketfuel now ready----->");
-            enableButton(true);
+            // enableButton(true);
 
             let formChecklist = setInterval(() => {
 
                 if (document.querySelector('.form-checklist.optimizedCheckout-form-checklist')) {
-                    console.log('Interval has been cleared for ')
+                    console.log('Interval has been cleared for ');
 
                     clearInterval(formChecklist);
-                    enableButton(true);
+                    // enableButton(true);
 
                     document.querySelector('.form-checklist.optimizedCheckout-form-checklist').addEventListener('click', handleClick, false);
 
@@ -520,18 +546,21 @@
 
                 if (document.querySelector('.form-checklist.optimizedCheckout-form-checklist li input#radio-moneyorder')) {
 
-                    mutateObserver()
+                    mutateObserver();
 
                     console.log('triggerBtn has been cleared for ');
 
-                    enableButton(true);
+
 
                     clearInterval(triggerBtn);
                     // document.querySelector('label[for=radio-moneyorder] span[data-test=payment-method-name]').innerText = 'Pay With Rocketfuel';
 
-                    document.getElementById('checkout-payment-continue').addEventListener('click', handlePlaceOrderButton, false)
-                    document.getElementById('checkout-payment-continue').dataset.rkfl = 'active'
+                    document.getElementById('checkout-payment-continue').addEventListener('click', handlePlaceOrderButton, false);
+                    RocketfuelPaymentEngine.buttonEventAdded = true;
 
+                    document.getElementById('checkout-payment-continue').dataset.rkfl = 'active';
+
+                    enableButton(true);
 
                 }
 

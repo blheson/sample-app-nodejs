@@ -228,7 +228,7 @@
                     }
 
                     try {
-                        console.log('details', userData.email, localStorage.getItem('rkfl_email'), payload);
+                        // console.log('details', userData.email, localStorage.getItem('rkfl_email'), payload);
 
                         if (userData.email !== localStorage.getItem('rkfl_email')) { //remove signon details when email is different
                             localStorage.removeItem('rkfl_token');
@@ -360,7 +360,9 @@
 
             if (theIndex && theIndex.id) {
                 console.log('Result from carts parsed: ', theIndex.id);
+
                 RocketfuelPaymentEngine.user_data.email = theIndex.email;
+                
                 cart = sortCart(theIndex.lineItems);
 
                 let payload = {
