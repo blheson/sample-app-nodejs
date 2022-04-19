@@ -1,18 +1,27 @@
 import crypto from 'crypto';
 import { NextApiRequest } from 'next';
 import { MerchantData } from '../types';
-import { decodePayload , publicKey} from './auth';
+import { decodePayload, publicKey } from './auth';
 
 import db from './db';
+async function getDataFromDB(storeHash){
+   return await db.getMerchant(storeHash);
+}
+export async function getEncrypted(merchantId, usePKey = true, storeHash = '') {
 
-export function getMerchantAuth(merchantId){
-  
+    let data
+    const buffer = Buffer.from(merchantId);
+    if(!usePKey && !!storeHash){
+        
+        data = await getDataFromDB(storeHash);
+      
+    }
+    const thePublicKey = usePKey ? publicKey :data[0]?.publicKey;
+    
+    const encrypted = crypto.publicEncrypt(thePublicKey, buffer);
+ 
 
-        const buffer = Buffer.from(merchantId);
-       
-        const encrypted = crypto.publicEncrypt(publicKey, buffer);
-     
-        return encrypted.toString("base64");
+    return encrypted.toString("base64");
 }
 
 export async function setMerchantData({ query: { context = '' } }, data: MerchantData) {
@@ -35,8 +44,8 @@ export async function getMerchantData({ query: { context = '' } }: NextApiReques
 
     }
 
-    const data =  await db.getMerchant(storeHash);
     
-    return data;
+
+    return await getDataFromDB(storeHash);
 }
 

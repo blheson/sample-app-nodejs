@@ -1,7 +1,5 @@
 (() => {
     var serverApiUrl = 'https://bigcommerce.rocketfuelblockchain.com';
-    // var serverApiUrl = 'https://df4d-102-89-33-196.ngrok.io';
-
     var path = window.location.pathname;
     let currentPage = path.split('/').pop();
     var thisScript = document.currentScript;
@@ -613,9 +611,10 @@
 
                     const payload = {
 
-                        temporary_order_id: temp_orderid_rocketfuel,
+                        temporaryOrderId: temp_orderid_rocketfuel,
 
-                        order_id
+                        orderId,
+                        storeHash: RocketfuelPaymentEngine.hash,
 
                     }
 

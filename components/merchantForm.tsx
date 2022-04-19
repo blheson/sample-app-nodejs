@@ -8,7 +8,7 @@ interface FormProps {
 }
 const FormErrors = {
     email: 'Email is required',
-    publicKey: 'Default price is required',
+    publicKey: 'Publickey is required',
 };
 const MerchantForm = ({ formData, onSubmit }: FormProps) => {
     const { environment, password, email, merchantId, publicKey } = formData;

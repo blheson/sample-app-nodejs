@@ -1,4 +1,4 @@
-import { getMerchantAuth } from '../lib/merchant';
+import { getEncrypted } from '../lib/merchant';
 import { MerchantData, RKFLPayload } from '../types';
 
 import db from './db';
@@ -66,12 +66,40 @@ async function charge(access: string, environment, { merchantId: merchant_id }: 
     const response = await fetch(environment + '/hosted-page', requestOptions);
 
     const result = await response.json();
- 
+
 
     return { uuid: result.result.uuid };
 
 }
-export async function getUUID(payload: RKFLPayload): Promise<{ merchantAuth: string, uuid: string ,environment:string}> {
+async function swap(environment: string, { orderId, temporaryOrderId },storeHash:string,merchantData: MerchantData): Promise<boolean> {
+    const rkflHeaders: Headers = new Headers();
+
+    rkflHeaders.append("Content-Type", "application/json");
+    const data = {
+        'tempOrderId':
+            temporaryOrderId,
+        'newOrderId': orderId
+    };
+
+    const merchantAuth = await getEncrypted(JSON.stringify(data), false,storeHash);
+    const merchantId = Buffer.from(merchantData.merchantId).toString('base64');
+    
+    const requestOptions: RequestInit = {
+        method: 'POST',
+        headers: rkflHeaders,
+        body: JSON.stringify({ merchantAuth, merchantId })
+    };
+    console.warn("Swap", {environment,requestOptions});
+    const response = await fetch(environment + '/update/orderId', requestOptions);
+
+    const result = await response.json();
+
+
+
+    return result?.ok;
+
+}
+export async function getUUID(payload: RKFLPayload): Promise<{ merchantAuth: string, uuid: string, environment: string }> {
 
     const merchantData = await getMerchantData(payload.storeHash);
 
@@ -83,9 +111,21 @@ export async function getUUID(payload: RKFLPayload): Promise<{ merchantAuth: str
 
     const { uuid } = await charge(access, environment, merchantData, payload);
 
-    const result =  { merchantAuth: getMerchantAuth(merchantData.merchantId), uuid ,environment:merchantData.environment};
-
+    const result = { merchantAuth: await getEncrypted(merchantData.merchantId), uuid, environment: merchantData.environment };
 
     return result
+}
+export async function swapOrder({orderId,temporaryOrderId,storeHash}: { temporaryOrderId: string, orderId: string, storeHash: string}): Promise<boolean> {
+
+    const merchantData = await getMerchantData(storeHash);
+    
+    const environment = getEnvironment(merchantData.environment);
+
+    const result = await swap(environment,{orderId,temporaryOrderId},storeHash,merchantData);
+
+
+
+
+    return result;
 }
 
