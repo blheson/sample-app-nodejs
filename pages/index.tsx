@@ -12,17 +12,18 @@ import { alertsManager } from './_app';
 
 const Index = () => {
     const {
-        merchantData = [],
+        merchantResult = {},
         isLoading,
         error
     } = useMerchant();
-
 
     const encodedContext = useSession()?.context;
 
     const formData = { environment: '', password: '', email: '', merchantId: '', publicKey: '' };
     let newData;
-    if (merchantData.length > 0) {
+    const merchantData = merchantResult.merchantData;
+
+    if (merchantData && merchantData.length > 0) {
         const theData = merchantData[0];
 
         delete theData.createdAt
@@ -64,7 +65,11 @@ const Index = () => {
     if (isLoading) return <Loading />;
     if (error) return <ErrorMessage error={error} />;
 
-    return (<MerchantForm formData={newData} onSubmit={handleSubmit} />);
+
+    return (
+        
+            <MerchantForm storeHash={merchantResult.storeHash} formData={newData} onSubmit={handleSubmit} />
+    );
 };
 
 export default Index;

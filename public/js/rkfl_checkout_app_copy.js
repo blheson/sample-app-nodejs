@@ -1,6 +1,7 @@
+
 (() => {
-    var serverApiUrl = 'https://bigcommerce.rocketfuelblockchain.com';
-    // var serverApiUrl = 'https://df4d-102-89-33-196.ngrok.io';
+
+    var serverApiUrl = 'https://2c63-102-89-34-21.ngrok.io';
 
     var path = window.location.pathname;
     let currentPage = path.split('/').pop();
@@ -275,7 +276,7 @@
             try {
 
                 let res = await engine.initRocketFuel();
-            
+
 
             } catch (error) {
 
@@ -574,11 +575,11 @@
 
 
 
-        let result = localStorage.getItem('payment_complete_order_status_rocketfuel')
+        let orderStatus = localStorage.getItem('payment_complete_order_status_rocketfuel')
 
-        if (result) {
+        if (orderStatus) {
 
-            let thankyouInter = setInterval(() => {
+            let thankyouInter = setInterval(async () => {
 
                 if (!document.querySelector('p[data-test=order-confirmation-order-status-text]')) return;
 
@@ -593,7 +594,7 @@
 
                     const order_id = document.querySelector('p[data-test=order-confirmation-order-number-text] strong').innerText;
 
-                    if (!order_id, !temp_orderid_rocketfuel) {
+                    if (!order_id && !temp_orderid_rocketfuel) {
 
                         console.log("could not retrieve", { order_id, temp_orderid_rocketfuel });
 
@@ -605,14 +606,18 @@
 
                     myHeaders.append("Content-Type", "application/json");
 
+
+                    console.log("myHeaders", { myHeaders })
+
+
                     const payload = {
 
-                        temporary_order_id: temp_orderid_rocketfuel,
+                        temporaryOrderId: temp_orderid_rocketfuel,
 
-                        order_id
-
+                        orderId: order_id,
+                        storeHash: RocketfuelPaymentEngine.hash,
+                        status: orderStatus
                     }
-
                     var requestOptions = {
                         method: 'POST',
                         headers: myHeaders,
@@ -620,10 +625,13 @@
 
                     };
 
-                    fetch(serverApiUrl + "/swap", requestOptions);
+                    const result = await fetch(serverApiUrl + "/api/sort-order", requestOptions);
+
+                    console.log("Result from sort-order", { result })
+ 
 
                 } catch (error) {
-
+                    console.error(error?.message)
                 }
             }, 500);
 
@@ -631,6 +639,4 @@
     }
 
 
-    // r9f8hq4vqa
-    // r9f8hq4vqa.
 })();

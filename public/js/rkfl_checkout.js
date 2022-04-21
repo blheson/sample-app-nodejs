@@ -65,7 +65,7 @@
                 console.log("Response from callback :", result, result?.status === undefined);
 
 
-                let status = "bc-on-hold";
+                let status = 0;
 
                 if (result?.status === undefined) {
                     return false;
@@ -74,17 +74,17 @@
                 let result_status = parseInt(result.status);
 
                 if (result_status === 101) {
-                    status = "bc-partial-payment";
+                    status = 12;
                 }
 
                 if (result_status === 1 || result.status === "completed") {
 
-                    status = 'bc-processing';
+                    status = 11;
 
                 }
 
                 if (result_status === -1) {
-                    status = "bc-failed";
+                    status = 6;
                 }
 
                 window.localStorage.setItem('payment_complete_order_status_rocketfuel', status);
@@ -211,7 +211,7 @@
                     }
 
                     try {
-                       
+
 
                         if (userData.email !== localStorage.getItem('rkfl_email')) { //remove signon details when email is different
                             localStorage.removeItem('rkfl_token');
@@ -269,7 +269,7 @@
             try {
 
                 let res = await engine.initRocketFuel();
-    
+
 
             } catch (error) {
 
@@ -332,14 +332,14 @@
             let response = await fetch(rootUrl + "/api/storefront/carts", requestOptions);
 
             let result = await response.text();
-      
+
             result = JSON.parse(result);
 
             let theIndex = result[0];
             let cart;
 
             if (theIndex && theIndex.id) {
-         
+
                 RocketfuelPaymentEngine.user_data.email = theIndex.email;
                 cart = sortCart(theIndex.lineItems);
 
@@ -369,7 +369,7 @@
 
                 let uuidResult = await uuidResponse.json();
 
-               
+
 
                 //response here
                 //set localstorage
@@ -392,7 +392,7 @@
 
         e.preventDefault();
 
-   
+
 
         console.log("Default prevented, Loading status", RocketfuelPaymentEngine.loading);
 
@@ -444,7 +444,7 @@
                             console.log('add button listener')
                         }
 
-                       
+
                     }
 
                 }
@@ -464,11 +464,11 @@
             setTimeout(() => {
 
                 if (RocketfuelPaymentEngine.loading === true) return;
-           
+
                 document.getElementById('checkout-payment-continue').disabled = false;
             }, 2000)
         } else {
-           
+
             if (RocketfuelPaymentEngine.response.uuid && RocketfuelPaymentEngine.buttonEventAdded === true) {// if we have uuid, no need to disabled
                 console.log('We have UUID, no buton disabling and event has been added ')
 
@@ -483,11 +483,12 @@
     if (currentPage.includes('checkout')) {
 
         localStorage.removeItem('temp_orderid_rocketfuel');
+        localStorage.removeItem('payment_complete_order_status_rocketfuel');
 
         let checkPlaceOrder = setInterval(() => {
             if (document.getElementById('radio-moneyorder')) {
-                
-   
+
+
 
                 if (document.getElementById('radio-moneyorder').checked == true) {
                     enableButton(false);
@@ -499,7 +500,7 @@
 
         let fixIframe = setInterval(() => {
             if (document.getElementById('iframeWrapper')) {
-             
+
 
                 document.getElementById('iframeWrapper').style.position = 'fixed';
 
@@ -562,7 +563,7 @@
                     document.getElementById('checkout-payment-continue').addEventListener('click', handlePlaceOrderButton, false);
 
                     RocketfuelPaymentEngine.buttonEventAdded = true;
-                    
+
                     document.getElementById('checkout-payment-continue').dataset.rkfl = 'active'
 
 
@@ -578,11 +579,11 @@
 
 
 
-        let result = localStorage.getItem('payment_complete_order_status_rocketfuel')
+        let orderStatus = localStorage.getItem('payment_complete_order_status_rocketfuel');
 
-        if (result) {
+        if (orderStatus) {
 
-            let thankyouInter = setInterval(() => {
+            let thankyouInter = setInterval(async () => {
 
                 if (!document.querySelector('p[data-test=order-confirmation-order-status-text]')) return;
 
@@ -597,7 +598,7 @@
 
                     const order_id = document.querySelector('p[data-test=order-confirmation-order-number-text] strong').innerText;
 
-                    if (!order_id, !temp_orderid_rocketfuel) {
+                    if (!order_id && !temp_orderid_rocketfuel) {
 
                         console.log("could not retrieve", { order_id, temp_orderid_rocketfuel });
 
@@ -613,11 +614,10 @@
 
                         temporaryOrderId: temp_orderid_rocketfuel,
 
-                        orderId,
+                        orderId: order_id,
                         storeHash: RocketfuelPaymentEngine.hash,
-
+status:orderStatus
                     }
-
                     var requestOptions = {
                         method: 'POST',
                         headers: myHeaders,
@@ -625,11 +625,17 @@
 
                     };
 
-                    fetch(serverApiUrl + "/swap", requestOptions);
+                    const result = await fetch(serverApiUrl + "/api/sort-order", requestOptions);
+
+                    console.log("Result from swap", { result });
+// if(result){
+
+// }
 
                 } catch (error) {
-
+                    console.error(error?.message);
                 }
+             
             }, 500);
 
         }

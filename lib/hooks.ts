@@ -103,7 +103,7 @@ export  function useMerchant(query?: QueryParams) {
     const { data, error } = useSWR(context ? ['/api/merchant', params] : null, fetcher);
 
     return {
-        merchantData:data,
+        merchantResult:data,
         isLoading: !data && !error,
         error
     };

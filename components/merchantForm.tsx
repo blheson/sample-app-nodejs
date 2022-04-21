@@ -5,12 +5,13 @@ import { MerchantData, StringKeyValue } from '../types';
 interface FormProps {
     formData: MerchantData;
     onSubmit(form: MerchantData): void;
+    storeHash: string
 }
 const FormErrors = {
     email: 'Email is required',
     publicKey: 'Publickey is required',
 };
-const MerchantForm = ({ formData, onSubmit }: FormProps) => {
+const MerchantForm = ({ storeHash, formData, onSubmit }: FormProps) => {
     const { environment, password, email, merchantId, publicKey } = formData;
 
 
@@ -42,9 +43,16 @@ const MerchantForm = ({ formData, onSubmit }: FormProps) => {
         setForm(prevForm => ({ ...prevForm, environment: value }));
     };
 
+
     return (
         <>
             <Form onSubmit={handleSubmit} >
+                <FormGroup>
+                    <>
+                        <label htmlFor="" style={{    color: '#313440',fontSize:'1rem',fontWeight:600}}>Callback URL:</label>
+                        <div style={{ fontSize: '14px' }}>You may login to <a href="https://app.rocketfuelblockchain.com/settings">Rocketfuel Merchant Settings</a> to update your Callback URL to: <span style={{ color: 'red', fontWeight: 600 }}>https://bigcommerce.rocketfuelblockchain.com/api/webhook/transaction/{storeHash}</span></div>
+                    </>
+                </FormGroup>
                 <FormGroup>
                     <Input
                         label="Email"
@@ -107,7 +115,7 @@ const MerchantForm = ({ formData, onSubmit }: FormProps) => {
                         resize={true}
                         value={form.publicKey}
                         onChange={handleChange}
-                        description="Public Key."
+                  
                         placeholder="Public Key..."
                         required
                     />

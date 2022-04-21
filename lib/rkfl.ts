@@ -1,5 +1,8 @@
+import * as crypto from 'crypto';
 import { getEncrypted } from '../lib/merchant';
 import { MerchantData, RKFLPayload } from '../types';
+
+import { bigcommerceClient, publicKey } from './auth';
 
 import db from './db';
 
@@ -71,7 +74,7 @@ async function charge(access: string, environment, { merchantId: merchant_id }: 
     return { uuid: result.result.uuid };
 
 }
-async function swap(environment: string, { orderId, temporaryOrderId },storeHash:string,merchantData: MerchantData): Promise<boolean> {
+async function swap(environment: string, { orderId, temporaryOrderId }, storeHash: string, merchantData: MerchantData): Promise<boolean> {
     const rkflHeaders: Headers = new Headers();
 
     rkflHeaders.append("Content-Type", "application/json");
@@ -81,20 +84,20 @@ async function swap(environment: string, { orderId, temporaryOrderId },storeHash
         'newOrderId': orderId
     };
 
-    const merchantAuth = await getEncrypted(JSON.stringify(data), false,storeHash);
+    const merchantAuth = await getEncrypted(JSON.stringify(data), false, storeHash);
     const merchantId = Buffer.from(merchantData.merchantId).toString('base64');
+
+ 
     
-    const requestOptions: RequestInit = {
+const requestOptions: RequestInit = {
         method: 'POST',
         headers: rkflHeaders,
         body: JSON.stringify({ merchantAuth, merchantId })
     };
-    console.warn("Swap", {environment,requestOptions});
+
     const response = await fetch(environment + '/update/orderId', requestOptions);
 
     const result = await response.json();
-
-
 
     return result?.ok;
 
@@ -115,17 +118,46 @@ export async function getUUID(payload: RKFLPayload): Promise<{ merchantAuth: str
 
     return result
 }
-export async function swapOrder({orderId,temporaryOrderId,storeHash}: { temporaryOrderId: string, orderId: string, storeHash: string}): Promise<boolean> {
+export async function swapOrder({ orderId, temporaryOrderId, storeHash }: { temporaryOrderId: string, orderId: string, storeHash: string }): Promise<boolean> {
 
     const merchantData = await getMerchantData(storeHash);
-    
+
     const environment = getEnvironment(merchantData.environment);
 
-    const result = await swap(environment,{orderId,temporaryOrderId},storeHash,merchantData);
+    const result = await swap(environment, { orderId, temporaryOrderId }, storeHash, merchantData);
 
 
 
 
     return result;
 }
+export async function verifyCallback(data, signature: string): Promise<boolean> {
 
+    const signatureBuffer = Buffer.from(signature);
+    const bufData = Buffer.from(data);
+
+    const algorithm = "SHA256";
+
+    const isVerified = crypto.verify(algorithm, bufData, publicKey, signatureBuffer);
+
+    console.warn({signatureBuffer,bufData,isVerified});
+    // return (1 === openssl_verify($body, signatureBuffer, self::get_callback_public_key(), OPENSSL_ALGO_SHA256));
+
+    return isVerified;
+}
+
+export async function updateOrderStatus(storeHash, orderId, status) {
+
+    const accessToken = await db.getStoreToken(storeHash);
+
+    const bigcommerce = bigcommerceClient(accessToken, storeHash,'v2');
+
+    const payload = {
+        status_id: status
+    }
+
+    const response = await bigcommerce.put(`/orders/${orderId}`, payload);
+
+    
+return response;
+}
