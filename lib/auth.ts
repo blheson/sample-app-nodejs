@@ -38,7 +38,10 @@ export const rkflSdkScript = RKFL_SDK;
 
 // export const publicKey = "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA2e4stIYooUrKHVQmwztC\n/l0YktX6uz4bE1iDtA2qu4OaXx+IKkwBWa0hO2mzv6dAoawyzxa2jmN01vrpMkMj\nrB+Dxmoq7tRvRTx1hXzZWaKuv37BAYosOIKjom8S8axM1j6zPkX1zpMLE8ys3dUX\nFN5Dl/kBfeCTwGRV4PZjP4a+QwgFRzZVVfnpcRI/O6zhfkdlRah8MrAPWYSoGBpG\nCPiAjUeHO/4JA5zZ6IdfZuy/DKxbcOlt9H+z14iJwB7eVUByoeCE+Bkw+QE4msKs\naIn4xl9GBoyfDZKajTzL50W/oeoE1UcuvVfaULZ9DWnHOy6idCFH1WbYDxYYIWLi\nAQIDAQAB\n-----END PUBLIC KEY-----";
 
-export const publicKey = PUBLIC_KEY;
+
+export const publicKey =PUBLIC_KEY
+
+// PUBLIC_KEY;
 
 
 export function bigcommerceClient(accessToken: string, storeHash: string, apiVersion = 'v3') {

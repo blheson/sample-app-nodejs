@@ -18,22 +18,24 @@ export default async function transaction(req: NextApiRequest, res: NextApiRespo
 
                 // console.warn({webhook:body});
                 const data = body.data;
-                console.warn({data:data.data});
+
                 const signature = body.signature;
                 // const storeHash = body.storeHash;
                 const paymentStatus = parseInt(data.paymentStatus);
-                
-               const isVerified =  await verifyCallback(data.data, signature)
-               
-       
+
+                const isVerified = verifyCallback(data.data, signature)
+
+
+
 
                 if (!isVerified) {
-                
-                     res.status(200).json({ message: 'Could not verify' });
 
-                     return;
+                    res.status(200).json({ message: 'Could not verify' });
+
+                    return;
                 }
                 let status = 0;
+              
                 switch (paymentStatus) {
 
                     case 1:
@@ -51,11 +53,18 @@ export default async function transaction(req: NextApiRequest, res: NextApiRespo
                     case 0:
                     default:
                         status = 7;
-
-                        return false;
                         break;
                 }
-                const result = await updateOrderStatus(storeHash, data.offerId, status);
+                let result;
+
+
+                if (status !== 7) {
+
+                    result = await updateOrderStatus(storeHash, data.offerId, status);
+
+                } else {// do not update if payment status is not confirmed
+                    result = { received: true }
+                }
 
 
                 res.status(200).json({ result });

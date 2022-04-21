@@ -87,9 +87,9 @@ async function swap(environment: string, { orderId, temporaryOrderId }, storeHas
     const merchantAuth = await getEncrypted(JSON.stringify(data), false, storeHash);
     const merchantId = Buffer.from(merchantData.merchantId).toString('base64');
 
- 
-    
-const requestOptions: RequestInit = {
+
+
+    const requestOptions: RequestInit = {
         method: 'POST',
         headers: rkflHeaders,
         body: JSON.stringify({ merchantAuth, merchantId })
@@ -131,17 +131,28 @@ export async function swapOrder({ orderId, temporaryOrderId, storeHash }: { temp
 
     return result;
 }
-export async function verifyCallback(data, signature: string): Promise<boolean> {
+export function verifyCallback(data:string, signature: string):boolean {
 
-    const signatureBuffer = Buffer.from(signature);
-    const bufData = Buffer.from(data);
+    // const signatureBuffer = Buffer.from(signature);
+    // const bufData = Buffer.from(data);
 
     const algorithm = "SHA256";
 
-    const isVerified = crypto.verify(algorithm, bufData, publicKey, signatureBuffer);
+    // const isVerified = crypto.verify(algorithm, bufData, publicKey, signatureBuffer);
 
-    console.warn({signatureBuffer,bufData,isVerified});
-    // return (1 === openssl_verify($body, signatureBuffer, self::get_callback_public_key(), OPENSSL_ALGO_SHA256));
+    // console.warn({signatureBuffer,bufData,isVerified});
+  
+
+    // Creating verify object with its algo
+    const verify = crypto.createVerify(algorithm);
+    verify.write(data);
+
+    // Calling end method
+    verify.end();
+    // Prints true if verified else false
+    const isVerified = verify.verify(publicKey, signature, 'base64');
+
+   
 
     return isVerified;
 }
@@ -150,7 +161,7 @@ export async function updateOrderStatus(storeHash, orderId, status) {
 
     const accessToken = await db.getStoreToken(storeHash);
 
-    const bigcommerce = bigcommerceClient(accessToken, storeHash,'v2');
+    const bigcommerce = bigcommerceClient(accessToken, storeHash, 'v2');
 
     const payload = {
         status_id: status
@@ -158,6 +169,6 @@ export async function updateOrderStatus(storeHash, orderId, status) {
 
     const response = await bigcommerce.put(`/orders/${orderId}`, payload);
 
-    
-return response;
+
+    return response;
 }

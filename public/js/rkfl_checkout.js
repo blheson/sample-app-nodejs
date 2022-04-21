@@ -616,7 +616,7 @@
 
                         orderId: order_id,
                         storeHash: RocketfuelPaymentEngine.hash,
-status:orderStatus
+                        status: orderStatus
                     }
                     var requestOptions = {
                         method: 'POST',
@@ -628,14 +628,14 @@ status:orderStatus
                     const result = await fetch(serverApiUrl + "/api/sort-order", requestOptions);
 
                     console.log("Result from swap", { result });
-// if(result){
+                    // if(result){
 
-// }
+                    // }
 
                 } catch (error) {
                     console.error(error?.message);
                 }
-             
+
             }, 500);
 
         }
