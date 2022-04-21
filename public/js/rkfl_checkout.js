@@ -482,7 +482,7 @@
     }
     function getStoreHash() {
         return new Promise((resolve, reject) => {
-            var scriptUrlInterval = setInterval(async function () {
+            var scriptUrlInterval = setInterval(function () {
 
                 if (thisScript) {
                     try {
@@ -605,64 +605,67 @@
 
 
         let orderStatus = localStorage.getItem('payment_complete_order_status_rocketfuel');
+        async function sortSuccessPage() {
+            if (orderStatus) {
+                const storeHash = await getStoreHash();
+                let thankyouInter = setInterval(async () => {
 
-        if (orderStatus) {
-          const storeHash =  await getStoreHash();
-            let thankyouInter = setInterval(async () => {
+                    if (!document.querySelector('p[data-test=order-confirmation-order-status-text]')) return;
 
-                if (!document.querySelector('p[data-test=order-confirmation-order-status-text]')) return;
+                    document.querySelector('p[data-test=order-confirmation-order-status-text]').innerHTML = 'Your order has been received, An email will be sent containing information about your purchase.';
 
-                document.querySelector('p[data-test=order-confirmation-order-status-text]').innerHTML = 'Your order has been received, An email will be sent containing information about your purchase.';
+                    document.querySelector('div[data-test=payment-instructions]').innerHTML = '';
 
-                document.querySelector('div[data-test=payment-instructions]').innerHTML = '';
+                    clearInterval(thankyouInter);
 
-                clearInterval(thankyouInter);
+                    try {
+                        const temp_orderid_rocketfuel = localStorage.getItem("temp_orderid_rocketfuel");
 
-                try {
-                    const temp_orderid_rocketfuel = localStorage.getItem("temp_orderid_rocketfuel");
+                        const order_id = document.querySelector('p[data-test=order-confirmation-order-number-text] strong').innerText;
 
-                    const order_id = document.querySelector('p[data-test=order-confirmation-order-number-text] strong').innerText;
+                        if (!order_id && !temp_orderid_rocketfuel) {
 
-                    if (!order_id && !temp_orderid_rocketfuel) {
+                            console.log("could not retrieve", { order_id, temp_orderid_rocketfuel });
 
-                        console.log("could not retrieve", { order_id, temp_orderid_rocketfuel });
+                            return;
 
-                        return;
+                        }
 
+                        var myHeaders = new Headers();
+
+                        myHeaders.append("Content-Type", "application/json");
+
+                        const payload = {
+
+                            temporaryOrderId: temp_orderid_rocketfuel,
+                            orderId: order_id,
+                            storeHash: RocketfuelPaymentEngine.hash,
+                            status: orderStatus
+                        }
+                        var requestOptions = {
+                            method: 'POST',
+                            headers: myHeaders,
+                            body: JSON.stringify(payload),
+
+                        };
+
+                        const result = await fetch(serverApiUrl + "/api/sort-order", requestOptions);
+
+                        console.log("Result from swap", { result });
+                        // if(result){
+
+                        // }
+
+                    } catch (error) {
+                        console.error(error?.message);
                     }
 
-                    var myHeaders = new Headers();
+                }, 500);
 
-                    myHeaders.append("Content-Type", "application/json");
-
-                    const payload = {
-
-                        temporaryOrderId: temp_orderid_rocketfuel,
-                        orderId: order_id,
-                        storeHash: RocketfuelPaymentEngine.hash,
-                        status: orderStatus
-                    }
-                    var requestOptions = {
-                        method: 'POST',
-                        headers: myHeaders,
-                        body: JSON.stringify(payload),
-
-                    };
-
-                    const result = await fetch(serverApiUrl + "/api/sort-order", requestOptions);
-
-                    console.log("Result from swap", { result });
-                    // if(result){
-
-                    // }
-
-                } catch (error) {
-                    console.error(error?.message);
-                }
-
-            }, 500);
-
+            }
         }
+        sortSuccessPage();
+
     }
 
 })();
