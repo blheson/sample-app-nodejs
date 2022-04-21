@@ -480,6 +480,31 @@
 
         }
     }
+    function getStoreHash() {
+        return new Promise((resolve, reject) => {
+            var scriptUrlInterval = setInterval(async function () {
+
+                if (thisScript) {
+                    try {
+                        clearInterval(scriptUrlInterval);
+                        var script_url = thisScript.src;
+                        let search = script_url.replace(serverApiUrl + `/js/rkfl_checkout.js`, '');
+                        let par = paramsToJSON(search)
+
+                        RocketfuelPaymentEngine.hash = par['storeHash'];
+
+                        console.log("Rocketfuel now ready----->");
+                        resolve(par['storeHash']);
+                    } catch (error) {
+                        resolve(false)
+
+                    }                    // enableButton(true);
+
+                }
+            }, 2000);
+        })
+
+    }
     if (currentPage.includes('checkout')) {
 
         localStorage.removeItem('temp_orderid_rocketfuel');
@@ -582,7 +607,7 @@
         let orderStatus = localStorage.getItem('payment_complete_order_status_rocketfuel');
 
         if (orderStatus) {
-
+          const storeHash =  await getStoreHash();
             let thankyouInter = setInterval(async () => {
 
                 if (!document.querySelector('p[data-test=order-confirmation-order-status-text]')) return;
@@ -613,7 +638,6 @@
                     const payload = {
 
                         temporaryOrderId: temp_orderid_rocketfuel,
-
                         orderId: order_id,
                         storeHash: RocketfuelPaymentEngine.hash,
                         status: orderStatus
