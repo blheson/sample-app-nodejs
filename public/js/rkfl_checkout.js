@@ -400,7 +400,12 @@
             return
         RocketfuelPaymentEngine.loading = true;
         console.log("Loading set to", RocketfuelPaymentEngine.loading)
-
+        let rkflInterval = setInterval(() => {
+            if (document.getElementById('Rocketfuel')) {
+                document.getElementById('Rocketfuel').style.display = 'block'
+                clearInterval(rkflInterval)
+            }
+        }, 1000)
         RocketfuelPaymentEngine.init();
     }
     function handleClick(e) {
@@ -439,9 +444,14 @@
                     if (document.getElementById('checkout-payment-continue')) {
 
                         if (!document.getElementById('checkout-payment-continue').dataset.rkfl) {
-                            document.getElementById('checkout-payment-continue').addEventListener('click', handlePlaceOrderButton, false)
+                            if (document.getElementById('radio-moneyorder')?.checked === true) {
+                                document.getElementById('checkout-payment-continue').addEventListener('click', handlePlaceOrderButton, false)
                             document.getElementById('checkout-payment-continue').dataset.rkfl = 'active'
                             console.log('add button listener')
+            
+                            }
+                       
+                            
                         }
 
 
@@ -580,16 +590,18 @@
                     console.log('triggerBtn has been cleared for ');
                     enableButton(true);
 
-
-
                     clearInterval(triggerBtn);
-                    // document.querySelector('label[for=radio-moneyorder] span[data-test=payment-method-name]').innerText = 'Pay With Rocketfuel';
+   
+                  
+                        if (document.getElementById('radio-moneyorder')?.checked === true) {
+                            document.getElementById('checkout-payment-continue').addEventListener('click', handlePlaceOrderButton, false);
 
-                    document.getElementById('checkout-payment-continue').addEventListener('click', handlePlaceOrderButton, false);
-
-                    RocketfuelPaymentEngine.buttonEventAdded = true;
-
-                    document.getElementById('checkout-payment-continue').dataset.rkfl = 'active'
+                            RocketfuelPaymentEngine.buttonEventAdded = true;
+        
+                            document.getElementById('checkout-payment-continue').dataset.rkfl = 'active'
+        
+                        }
+                   
 
 
                 }
