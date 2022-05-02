@@ -89,7 +89,7 @@
 
                 window.localStorage.setItem('payment_complete_order_status_rocketfuel', status);
 
-
+                document.getElementById('checkout-payment-continue').removeEventListener('click', handlePlaceOrderButton, false);
                 document.getElementById('checkout-payment-continue').dataset.rkfl = 'notactive'
                 // document.getElementById('checkout-payment-continue').click();
             } catch (error) {
@@ -413,8 +413,8 @@
 
     }
     function handleClick(e) {
-
-        if (!e.target.id || e.target.id === 'rkfl-btn-place-order') {
+        console.log(e.target, "e.target");
+        if (!e.target.id) {
             return
         }
 
@@ -422,30 +422,20 @@
             if (!document.getElementById('rkfl-btn-place-order')) {
                 createPlaceOrderButton()
             }
-            document.getElementById('checkout-payment-continue').style.visibility = 'hidden'
-            setTimeout(() => {
-                document.getElementById('rkfl-btn-place-order').style.display = 'block'
-            }, 1000)
+            document.getElementById('rkfl-btn-place-order').style.display = 'block'
             RocketfuelPaymentEngine.buttonEventAdded = true;
 
             console.log("RKFL HAS BEEN SELECTED");
-
-
-
-            document.getElementById('checkout-payment-continue').style.visibility = 'hidden';
+            document.getElementById('checkout-payment-continue').dataset.rkfl = 'active'
+            document.getElementById('checkout-payment-continue').style.visibility = 'hidden'
 
 
         } else {
             console.warn("RKFL HAS BEEN UNSELECTED");
-            if (document.getElementById('rkfl-btn-place-order')) {
-                document.getElementById('rkfl-btn-place-order').style.display = 'none'
-            }
-            if (document.getElementById('checkout-payment-continue')) {
-                document.getElementById('checkout-payment-continue').style.visibility = 'inherit'
-            }
+            document.getElementById('checkout-payment-continue').dataset.rkfl = 'notactive'
+            document.getElementById('checkout-payment-continue').style.visibility = 'inherit'
 
-
-
+            document.getElementById('rkfl-btn-place-order').style.display = 'none'
 
 
         }
@@ -468,8 +458,12 @@
                             if (document.getElementById('radio-moneyorder')?.checked === true) {
 
                                 document.getElementById('checkout-payment-continue').dataset.rkfl = 'active'
-                                console.log('add button listener');
+                                console.log('add button listener')
+                                if (document.querySelector('.form-checklist.optimizedCheckout-form-checklist').dataset.rfklevent !== true) {
+                                    document.querySelector('.form-checklist.optimizedCheckout-form-checklist').addEventListener('click', handleClick, false);
 
+                                    document.querySelector('.form-checklist.optimizedCheckout-form-checklist').dataset.rfklevent = true
+                                }
                             }
 
 
@@ -497,7 +491,7 @@
                 if (RocketfuelPaymentEngine.loading === true) return;
 
                 document.getElementById('rkfl-btn-place-order').disabled = false;
-                document.getElementById('rkfl-btn-place-order').style.display = 'block';
+                document.getElementById('rkfl-btn-place-order').style.display= 'block';
             }, 2000)
         } else {
 
@@ -543,34 +537,14 @@
         localStorage.removeItem('temp_orderid_rocketfuel');
         localStorage.removeItem('payment_complete_order_status_rocketfuel');
         function createPlaceOrderButton() {
-            if (document.getElementById('rkfl-btn-place-order')) {
-                return;
-            }
-            const rfklCheckoutBtnCover = document.createElement('div');
-            rfklCheckoutBtnCover.classList.add('form-actions');
 
             const rfklCheckoutBtn = document.createElement('div');
-
             rfklCheckoutBtn.id = 'rkfl-btn-place-order';
             rfklCheckoutBtn.disabled = true;
+            rfklCheckoutBtn.style.display = 'none';
+            rfklCheckoutBtn.addEventListener('click', handlePlaceOrderButton)
 
-            rfklCheckoutBtn.style.cssText = 'display:none;background-color:#333;border-color:#333;color:#fff;font-family:Montserrat,Arial,Helvetica,sans-serif;padding:1.1875rem 4.5rem;font-size:1.38462rem;text-align:center;cursor:pointer;margin-left:0;width:100%';
-
-            rfklCheckoutBtn.addEventListener('click', handlePlaceOrderButton);
-
-            rfklCheckoutBtn.innerHTML = 'PLACE ORDER WITH ROCKETFUEL';
-
-            rfklCheckoutBtnCover.appendChild(rfklCheckoutBtn)
-
-            // document.getElementById('checkout-payment-continue').parentElement.prepend(rfklCheckoutBtn);
-            const checkoutPayIn = setInterval(() => {
-                if (document.getElementById('checkout-payment-continue')) {
-
-                    document.getElementById('checkout-payment-continue').parentNode.parentNode.insertBefore(rfklCheckoutBtnCover, document.getElementById('checkout-payment-continue').parentNode);
-
-                    clearInterval(checkoutPayIn);
-                }
-            }, 1000);
+            document.getElementById('checkout-payment-continue').parentElement.prepend(rfklCheckoutBtn);
         }
         let checkPlaceOrder = setInterval(() => {
             if (document.getElementById('radio-moneyorder')) {
@@ -627,8 +601,8 @@
                     clearInterval(formChecklist);
                     // enableButton(true);
 
-                    document.getElementById('checkout-app').addEventListener('click', handleClick, false);
-
+                    document.querySelector('.form-checklist.optimizedCheckout-form-checklist').addEventListener('click', handleClick, false);
+                    document.querySelector('.form-checklist.optimizedCheckout-form-checklist').dataset.rfklevent = true;
 
                 }
 
@@ -640,7 +614,7 @@
                     mutateObserver();
 
                     console.log('triggerBtn has been cleared');
-
+                    enableButton(true);
 
                     clearInterval(triggerBtn);
 
@@ -649,7 +623,7 @@
                         if (!document.getElementById('rkfl-btn-place-order')) {
                             createPlaceOrderButton();
                         }
-                        enableButton(true);
+
                         RocketfuelPaymentEngine.buttonEventAdded = true;
 
                         document.getElementById('checkout-payment-continue').dataset.rkfl = 'active'

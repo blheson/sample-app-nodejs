@@ -1,0 +1,2 @@
+remove paramsToJSON
+add the hash
