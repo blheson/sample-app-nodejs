@@ -57,7 +57,7 @@
 
             document.getElementById('checkout-payment-continue').click();
 
-            console.log('Trigger has been called ');
+  
         },
         updateOrder: function (result) {
             try {
@@ -222,11 +222,16 @@
                         rkflToken = localStorage.getItem('rkfl_token');
 
                         if (!rkflToken && payload.merchantAuth) {
+try {
+    response = await RocketfuelPaymentEngine.rkfl.rkflAutoSignUp(payload, RocketfuelPaymentEngine.getEnvironment());
+    RocketfuelPaymentEngine.setLocalStorage('rkfl_email', userData.email);
+} catch (error) {
+    
+}
+                            
 
-                            response = await RocketfuelPaymentEngine.rkfl.rkflAutoSignUp(payload, RocketfuelPaymentEngine.getEnvironment());
 
-
-                            RocketfuelPaymentEngine.setLocalStorage('rkfl_email', userData.email);
+                        
 
                             if (response) {
 
@@ -350,7 +355,7 @@
                     storeHash: RocketfuelPaymentEngine.hash
                 }
 
-                console.log('Sorted Cart ', cart, RocketfuelPaymentEngine.hash);
+              
                 //Get UUID here
                 //fetch here
                 var myHeaders = new Headers();
@@ -378,13 +383,13 @@
                 RocketfuelPaymentEngine.setLocalStorage('temp_orderid_rocketfuel', RocketfuelPaymentEngine.response.temporaryOrderId)
                 // temp_orderid_rocketfuel
 
-                console.log('Engin response ', RocketfuelPaymentEngine.response);
+              
 
             }
 
         } catch (error) {
 
-            console.log('error from init', error)
+            console.error('error from init', error)
         }
 
     }
@@ -399,7 +404,7 @@
         if (RocketfuelPaymentEngine.loading === true)
             return
         RocketfuelPaymentEngine.loading = true;
-        console.log("Loading set to", RocketfuelPaymentEngine.loading);
+      
 
         let rkflInterval = setInterval(() => {
             if (document.getElementById('Rocketfuel')) {
@@ -414,7 +419,7 @@
     }
     function handleClick(e) {
 
-        if (!e.target.id || e.target.id === 'rkfl-btn-place-order') {
+        if (!e.target.id || e.target.id === 'rkfl-btn-place-order' || e.target.id === 'checkout-payment-continue') {
             return
         }
 
@@ -424,7 +429,10 @@
             }
             document.getElementById('checkout-payment-continue').style.visibility = 'hidden'
             setTimeout(() => {
-                document.getElementById('rkfl-btn-place-order').style.display = 'block'
+                if(document.getElementById('radio-moneyorder')?.checked === true){
+                    document.getElementById('rkfl-btn-place-order').style.display = 'block'
+                }
+                
             }, 1000)
             RocketfuelPaymentEngine.buttonEventAdded = true;
 
@@ -468,7 +476,7 @@
                             if (document.getElementById('radio-moneyorder')?.checked === true) {
 
                                 document.getElementById('checkout-payment-continue').dataset.rkfl = 'active'
-                                console.log('add button listener');
+                              
 
                             }
 
@@ -506,7 +514,7 @@
 
                 return;
             }
-            console.log('Disabling buton');
+           
             document.getElementById('rkfl-btn-place-order').disabled = true;
 
 
@@ -603,10 +611,10 @@
                     var script_url = thisScript.src;
                     let search = script_url.replace(serverApiUrl + `/js/rkfl_checkout.js`, '');
                     let par = paramsToJSON(search)
-                    console.log("par['storeHash']", par['storeHash'])
+                   
                     RocketfuelPaymentEngine.hash = par['storeHash'];
                     // hash = search.split('&')[0].split('=')[1]
-                    // console.log(hash,'search')
+                 
                     // hash = hash.split('&')[0];
                     await initUUID();
                     console.log("Rocketfuel now ready----->");
@@ -622,7 +630,7 @@
 
 
                 if (document.querySelector('.form-checklist.optimizedCheckout-form-checklist')) {
-                    console.log('Interval has been cleared for formChecklist')
+                  
 
                     clearInterval(formChecklist);
                     // enableButton(true);
@@ -639,8 +647,7 @@
 
                     mutateObserver();
 
-                    console.log('triggerBtn has been cleared');
-
+               
 
                     clearInterval(triggerBtn);
 
@@ -691,7 +698,7 @@
 
                         if (!order_id && !temp_orderid_rocketfuel) {
 
-                            console.log("could not retrieve", { order_id, temp_orderid_rocketfuel });
+                             
 
                             return;
 

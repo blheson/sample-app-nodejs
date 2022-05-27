@@ -413,7 +413,7 @@
     }
     function handleClick(e) {
 
-        if (!e.target.id || e.target.id === 'rkfl-btn-place-order') {
+        if (!e.target.id || e.target.id === 'rkfl-btn-place-order' || e.target.id === 'checkout-payment-continue') {
             return
         }
 
@@ -423,7 +423,9 @@
             }
             document.getElementById('checkout-payment-continue').style.visibility = 'hidden'
             setTimeout(() => {
-                document.getElementById('rkfl-btn-place-order').style.display = 'block'
+                if(document.getElementById('radio-moneyorder')?.checked === true){
+                    document.getElementById('rkfl-btn-place-order').style.display = 'block'
+                }
             }, 1000)
             RocketfuelPaymentEngine.buttonEventAdded = true;
 
