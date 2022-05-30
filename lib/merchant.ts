@@ -9,7 +9,7 @@ async function getDataFromDB(storeHash){
 }
 export async function getEncrypted(merchantId, usePKey = true, storeHash = '') {
 
-    let data
+    let data;
     const buffer = Buffer.from(merchantId);
     if(!usePKey && !!storeHash){
         
