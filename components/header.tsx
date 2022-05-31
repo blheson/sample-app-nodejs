@@ -68,7 +68,7 @@ const Header = () => {
         <Box marginBottom="xxLarge">
             <Image src='https://store.rocketfuelblockchain.com/wp-content/uploads/2021/04/RocketFuelLogo-450x81.png' width='166' height='29.88' />
             <H1>Welcome to Rocketfuel</H1>
-            <span>Please fill in your details below</span>
+            <span>Please fill in the details below</span>
             {/* <Tabs
                 activeTab={activeTab}
                 items={items}

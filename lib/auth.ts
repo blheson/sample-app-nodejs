@@ -6,7 +6,7 @@ import db from './db';
 import 'dotenv/config';
 
 const { API_URL, APP_URL, AUTH_CALLBACK, CLIENT_ID, CLIENT_SECRET, JWT_KEY, LOGIN_URL,RKFL_SDK, SCRIPT_CHECKOUT ,PUBLIC_KEY} = process.env;
-
+console.warn({ API_URL, APP_URL, AUTH_CALLBACK, CLIENT_ID, CLIENT_SECRET, JWT_KEY, LOGIN_URL,RKFL_SDK, SCRIPT_CHECKOUT ,PUBLIC_KEY});
 // Used for internal configuration; 3rd party apps may remove
 const apiConfig: ApiConfig = {};
 if (API_URL && LOGIN_URL) {

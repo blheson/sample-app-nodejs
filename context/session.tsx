@@ -9,6 +9,7 @@ const SessionProvider = ({ children }) => {
     const [context, setContext] = useState('');
 
     useEffect(() => {
+    
         if (query.context) {
             setContext(query.context.toString());
             // Keeps app in sync with BC (e.g. heatbeat, user logout, etc)
