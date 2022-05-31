@@ -4,9 +4,10 @@ import { bigcommerceClient, checkoutScript, encodePayload, getBCAuth, rkflSdkScr
 export default async function auth(req: NextApiRequest, res: NextApiResponse) {
     try {
         // Authenticate the app on install
-        const session = await getBCAuth(req.query);
-        console.warn("sessionsession", session);
+     
 
+        const session = await getBCAuth(req.query);
+       
         const encodedContext = encodePayload(session); // Signed JWT to validate/ prevent tampering
         // const { accessToken, storeHash } = await getSession(req);
 

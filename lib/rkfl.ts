@@ -36,7 +36,7 @@ async function getMerchantData(storeHash): Promise<MerchantData> {
     return merchantData[0];
 
 }
-async function login(environment: string, { email, password }: MerchantData): Promise<{ access: string }> {
+async function login(environment: string, { email, password }: MerchantData): Promise<{ access: string, error?: boolean }> {
     const raw = { email, password };
     const myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
@@ -48,7 +48,9 @@ async function login(environment: string, { email, password }: MerchantData): Pr
 
 
     const result = await response.json();
-
+    if (result.ok === false) {
+        return { access: '', error: true };
+    }
 
     return { access: result.result.access };
 
@@ -102,15 +104,18 @@ async function swap(environment: string, { orderId, temporaryOrderId }, storeHas
     return result?.ok;
 
 }
-export async function getUUID(payload: RKFLPayload): Promise<{ merchantAuth: string, uuid: string, environment: string }> {
+export async function getUUID(payload: RKFLPayload): Promise<{ merchantAuth: string, uuid: string, environment: string, error?: boolean, message?: string }> {
 
     const merchantData = await getMerchantData(payload.storeHash);
 
     const environment = getEnvironment(merchantData.environment);
 
 
-    const { access } = await login(environment, merchantData);
+    const { access, error } = await login(environment, merchantData);
 
+    if (error === true) {
+        return { merchantAuth: '', uuid: '', environment: '', error: true, message: 'Could not verify merchant login details' };
+    }
 
     const { uuid } = await charge(access, environment, merchantData, payload);
 
@@ -131,7 +136,7 @@ export async function swapOrder({ orderId, temporaryOrderId, storeHash }: { temp
 
     return result;
 }
-export function verifyCallback(data:string, signature: string):boolean {
+export function verifyCallback(data: string, signature: string): boolean {
 
     // const signatureBuffer = Buffer.from(signature);
     // const bufData = Buffer.from(data);
@@ -141,7 +146,7 @@ export function verifyCallback(data:string, signature: string):boolean {
     // const isVerified = crypto.verify(algorithm, bufData, publicKey, signatureBuffer);
 
     // console.warn({signatureBuffer,bufData,isVerified});
-  
+
 
     // Creating verify object with its algo
     const verify = crypto.createVerify(algorithm);
@@ -152,7 +157,7 @@ export function verifyCallback(data:string, signature: string):boolean {
     // Prints true if verified else false
     const isVerified = verify.verify(publicKey, signature, 'base64');
 
-   
+
 
     return isVerified;
 }

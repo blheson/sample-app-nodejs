@@ -52,14 +52,14 @@ export default async function merchant(req: NextApiRequest, res: NextApiResponse
                     'redirectUrl': ''
                 }
 
-                const { uuid, merchantAuth, environment } = await getUUID(data);
-                const result = { uuid, merchantAuth, environment, temporaryOrderId };
+                const result = await getUUID(data);
+                // const result = { uuid, merchantAuth, environment, temporaryOrderId };
 
                 // const bigcommerce = bigcommerceClient(accessToken, storeHash);
 
                 // const merchantData = await getMerchantData(req);
 
-                res.status(200).json(result);
+                res.status(200).json({...result,temporaryOrderId});
             } catch (error) {
 
                 const { message, response } = error;
