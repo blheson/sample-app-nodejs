@@ -36,6 +36,79 @@ async function getMerchantData(storeHash): Promise<MerchantData> {
     return merchantData[0];
 
 }
+function mapStatus(status: number) {
+    switch (status) {
+        case 101:
+            return 12
+            break;
+        case 1:
+            return 11;
+        case -1:
+            return 6
+        default:
+            return 0
+            break;
+    }
+}
+async function getTransactions(environment: string, { access }: { access: string }): Promise<any> {
+    try {
+
+        const myHeaders = new Headers();
+
+        myHeaders.append("Content-Type", "application/json");
+        myHeaders.append("Authorization", "Bearer " + access);
+
+
+        const response = await fetch(environment + '/tx?limit=10', {
+            method: "GET",
+            headers: myHeaders
+        })
+
+        const result = await response.json();
+
+        return result;
+    } catch (error) {
+        return {
+            error: true,
+            message: error?.message
+        }
+    }
+}
+async function getInvoiceData(environment: string, uuid: string): Promise<any> {
+    try {
+
+        const myHeaders = new Headers();
+        myHeaders.append("Content-Type", "application/json");
+
+
+        const response = await fetch(environment + '/hosted-page?uuid=' + uuid, {
+            method: "GET",
+            headers: myHeaders
+        })
+
+        const result = await response.json();
+
+        return result;
+
+    } catch (error) {
+        console.error("There was an error confirming uuid", error?.message);
+
+        return {} as Response
+    }
+
+    return true;
+
+
+}
+async function autologin(storeHash) {
+
+    const merchantData = await getMerchantData(storeHash);
+
+    const environment = getEnvironment(merchantData.environment);
+
+
+    return await login(environment, merchantData);
+}
 async function login(environment: string, { email, password }: MerchantData): Promise<{ access: string, error?: boolean }> {
     const raw = { email, password };
     const myHeaders = new Headers();
@@ -76,19 +149,7 @@ async function charge(access: string, environment, { merchantId: merchant_id }: 
     return { uuid: result.result.uuid };
 
 }
-async function swap(environment: string, { orderId, temporaryOrderId }, storeHash: string, merchantData: MerchantData): Promise<boolean> {
-    const rkflHeaders: Headers = new Headers();
-
-    rkflHeaders.append("Content-Type", "application/json");
-    const data = {
-        'tempOrderId':
-            temporaryOrderId,
-        'newOrderId': orderId
-    };
-
-    const merchantAuth = await getEncrypted(JSON.stringify(data), false, storeHash);
-    const merchantId = Buffer.from(merchantData.merchantId).toString('base64');
-
+async function sendSwapRequest(environment, rkflHeaders, merchantAuth, merchantId) {
 
 
     const requestOptions: RequestInit = {
@@ -102,8 +163,26 @@ async function swap(environment: string, { orderId, temporaryOrderId }, storeHas
     const result = await response.json();
 
     return result?.ok;
+}
+async function swap(environment: string, { orderId, temporaryOrderId }, storeHash: string, merchantData: MerchantData, merchantAuth = ''): Promise<boolean> {
+    const rkflHeaders: Headers = new Headers();
+
+    rkflHeaders.append("Content-Type", "application/json");
+
+    const data = {
+        'tempOrderId':
+            temporaryOrderId,
+        'newOrderId': orderId
+    };
+
+    merchantAuth = merchantAuth || await getEncrypted(JSON.stringify(data), false, storeHash);
+
+    const merchantId = Buffer.from(merchantData.merchantId).toString('base64');
+
+    return await sendSwapRequest(environment, rkflHeaders, merchantAuth, merchantId);
 
 }
+
 export async function getUUID(payload: RKFLPayload): Promise<{ merchantAuth: string, uuid: string, environment: string, error?: boolean, message?: string }> {
 
     const merchantData = await getMerchantData(payload.storeHash);
@@ -161,19 +240,67 @@ export function verifyCallback(data: string, signature: string): boolean {
 
     return isVerified;
 }
+export async function validateAuth(storeHash:string, merchantAuth:string) {
 
-export async function updateOrderStatus(storeHash, orderId, status) {
+    const merchantData = await getMerchantData(storeHash);
 
-    const accessToken = await db.getStoreToken(storeHash);
+    const environment = getEnvironment(merchantData.environment);
 
-    const bigcommerce = bigcommerceClient(accessToken, storeHash, 'v2');
+    return await swap(environment, { orderId:'', temporaryOrderId:'' }, storeHash, merchantData, merchantAuth)
+}
+export async function updateOrderStatus(storeHash, orderId, uuid) {
 
-    const payload = {
-        status_id: status
+    try {
+
+        const merchantData = await getMerchantData(storeHash);
+
+
+        const environment = getEnvironment(merchantData.environment);
+
+        const resultAuthLogin = await autologin(storeHash)
+        if (resultAuthLogin.error) return { error: true, message: 'Could not verify merchant' }
+
+        const confirmation = await getInvoiceData(environment, uuid);
+        const txData = await getTransactions(environment, resultAuthLogin);
+        if (txData.error) return { error: true, message: 'Could not get transactions' }
+        // console.warn(JSON.stringify(txData.result.txs,null,4));
+        const foundTx = txData.result.txs.find((tx) =>
+            tx.hostedPage.uuid === uuid
+        )
+        const mappedStatus = mapStatus(foundTx?.status);
+
+        if (mappedStatus === 0) {
+            // return { error: true, message: 'Order is pending' }
+        }
+
+        // confirmation.amount
+
+        //check amount is same
+        //check tx is available and status is okay
+        const accessToken = await db.getStoreToken(storeHash);
+
+        const bigcommerce = bigcommerceClient(accessToken, storeHash, 'v2');
+
+        const data = await bigcommerce.get(`/orders/${orderId}`);
+        if (Number(confirmation.result?.returnval?.amount?.toString()) !== Number(data.total_inc_tax) && Number(confirmation.result?.returnval?.amount?.toString()) !== Number(data.total_ex_tax)) {
+            console.warn(confirmation.result?.returnval?.amount?.toString(), "confirmation.result?.returnval?.amount?.toString()", data.total_inc_tax, " data.total_inc_tax", data.total_ex_tax)
+
+            return { error: true, message: 'Error with order _' }
+
+        }
+
+        const payload = {
+            status_id: mappedStatus
+        }
+
+
+        const response = await bigcommerce.put(`/orders/${orderId}`, payload);
+
+
+        return response;
+
+    } catch (error) {
+        return { error: true, message: 'Error with sorting: ' + error?.message }
+
     }
-
-    const response = await bigcommerce.put(`/orders/${orderId}`, payload);
-
-
-    return response;
 }

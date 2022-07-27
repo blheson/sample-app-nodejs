@@ -1,6 +1,6 @@
 (() => {
-    var serverApiUrl = 'https://bigcommerce.rocketfuelblockchain.com';
-    // var serverApiUrl = 'https://15fa-102-89-32-138.ngrok.io';
+    // var serverApiUrl = 'https://bigcommerce.rocketfuelblockchain.com';
+    var serverApiUrl = 'https://e606-146-70-83-71.ngrok.io';
 
      var path = window.location.pathname; let currentPage = path.split('/').pop(); var thisScript = document.currentScript; function paramsToJSON(search) { search = search.substring(1); return JSON.parse('{"' + decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g, '":"') + '"}') }
     var RocketfuelPaymentEngine = {
@@ -9,11 +9,11 @@
             if (!user_data) return false; return user_data;
         }, triggerPlaceOrder: function () { document.getElementById('checkout-payment-continue').disabled = false; document.getElementById('checkout-payment-continue').click(); }, updateOrder: function (result) {
             try {
-                console.log("Response from callback :", result, result?.status === undefined); let status = 0; if (result?.status === undefined) { return false; }
-                let result_status = parseInt(result.status); if (result_status === 101) { status = 12; }
-                if (result_status === 1 || result.status === "completed") { status = 11; }
-                if (result_status === -1) { status = 6; }
-                window.localStorage.setItem('payment_complete_order_status_rocketfuel', status); document.getElementById('checkout-payment-continue').dataset.rkfl = 'notactive'
+                // console.log("Response from callback :", result, result?.status === undefined); let status = 0; if (result?.status === undefined) { return false; }
+                // let result_status = parseInt(result.status); if (result_status === 101) { status = 12; }
+                // if (result_status === 1 || result.status === "completed") { status = 11; }
+                // if (result_status === -1) { status = 6; }
+                 document.getElementById('checkout-payment-continue').dataset.rkfl = 'notactive'
             } catch (error) { console.error('Error from update order method', error?.message); }
         }, startPayment: function (autoTriggerState = true) { this.watchIframeShow = true; let checkIframe = setInterval(() => { if (RocketfuelPaymentEngine.rkfl.iframeInfo.iframe) { RocketfuelPaymentEngine.rkfl.initPayment(); clearInterval(checkIframe); } }, 500); }, prepareRetrigger: function () {
             if (document.getElementById('rocketfuel_overlay_page_for_iframe')) { document.getElementById('rocketfuel_overlay_page_for_iframe').remove(); }
@@ -68,7 +68,10 @@
                 RocketfuelPaymentEngine.user_data.email = theIndex.email; cart = sortCart(theIndex.lineItems); let payload = { currency: theIndex.currency.code, cart, amount: theIndex.baseAmount, storeHash: RocketfuelPaymentEngine.hash }
                 var myHeaders = new Headers(); myHeaders.append("Content-Type", "application/json"); var requestOptions = { method: 'POST', headers: myHeaders, body: JSON.stringify(payload), }; let uuidResponse = await fetch(serverApiUrl + "/api/payment", requestOptions); let uuidResult = await uuidResponse.json(); 
                 RocketfuelPaymentEngine.response = uuidResult
+                
+                RocketfuelPaymentEngine.setLocalStorage('merchant_auth_rocketfuel', RocketfuelPaymentEngine.response.merchantAuth)
                 RocketfuelPaymentEngine.setLocalStorage('temp_orderid_rocketfuel', RocketfuelPaymentEngine.response.temporaryOrderId)
+                RocketfuelPaymentEngine.setLocalStorage('uuid_rocketfuel', RocketfuelPaymentEngine.response.uuid)
             }
         } catch (error) { console.error('error from init', error) }
     }
@@ -91,6 +94,7 @@
             setTimeout(() => { if (document.getElementById('radio-moneyorder')?.checked === true) { document.getElementById('rkfl-btn-place-order').style.display = 'block' } }, 1000)
             RocketfuelPaymentEngine.buttonEventAdded = true; console.log("RKFL HAS BEEN SELECTED"); document.getElementById('checkout-payment-continue').style.visibility = 'hidden';
         } else {
+            RocketfuelPaymentEngine.loading === false
             console.warn("RKFL HAS BEEN UNSELECTED"); if (document.getElementById('rkfl-btn-place-order')) { document.getElementById('rkfl-btn-place-order').style.display = 'none' }
             if (document.getElementById('checkout-payment-continue')) { document.getElementById('checkout-payment-continue').style.visibility = 'inherit' }
         }
@@ -118,7 +122,9 @@
         })
     }
     if (currentPage.includes('checkout')) {
-        localStorage.removeItem('temp_orderid_rocketfuel'); localStorage.removeItem('payment_complete_order_status_rocketfuel'); function createPlaceOrderButton() {
+        localStorage.removeItem('temp_orderid_rocketfuel'); 
+        localStorage.removeItem('merchant_auth_rocketfuel'); 
+         function createPlaceOrderButton() {
             if (document.getElementById('rkfl-btn-place-order')) { return; }
             const rfklCheckoutBtnCover = document.createElement('div'); rfklCheckoutBtnCover.classList.add('form-actions'); const rfklCheckoutBtn = document.createElement('div'); rfklCheckoutBtn.id = 'rkfl-btn-place-order'; rfklCheckoutBtn.disabled = true; rfklCheckoutBtn.style.cssText = 'display:none;background-color:#333;border-color:#333;color:#fff;font-family:Montserrat,Arial,Helvetica,sans-serif;padding:1.1875rem 4.5rem;font-size:1.38462rem;text-align:center;cursor:pointer;margin-left:0;width:100%'; rfklCheckoutBtn.addEventListener('click', handlePlaceOrderButton); rfklCheckoutBtn.innerHTML = 'PLACE ORDER WITH ROCKETFUEL'; rfklCheckoutBtnCover.appendChild(rfklCheckoutBtn)
             const checkoutPayIn = setInterval(() => { if (document.getElementById('checkout-payment-continue')) { document.getElementById('checkout-payment-continue').parentNode.parentNode.insertBefore(rfklCheckoutBtnCover, document.getElementById('checkout-payment-continue').parentNode); clearInterval(checkoutPayIn); } }, 1000);
@@ -146,12 +152,18 @@
         });
     }
     if (currentPage.includes('order-confirmation')) {
-        let orderStatus = localStorage.getItem('payment_complete_order_status_rocketfuel'); async function sortSuccessPage() {
-            if (orderStatus) {
+ 
+        let uuid = localStorage.getItem('uuid_rocketfuel'); 
+        let merchant_auth_rocketfuel = localStorage.getItem('merchant_auth_rocketfuel'); 
+        
+        async function sortSuccessPage() {
+            if ( uuid ) {
                 const storeHash = await getStoreHash(); let thankyouInter = setInterval(async () => {
                     if (!document.querySelector('p[data-test=order-confirmation-order-status-text]')) return; document.querySelector('p[data-test=order-confirmation-order-status-text]').innerHTML = 'Your order has been received, An email will be sent containing information about your purchase.'; document.querySelector('div[data-test=payment-instructions]').innerHTML = ''; clearInterval(thankyouInter); try {
                         const temp_orderid_rocketfuel = localStorage.getItem("temp_orderid_rocketfuel"); const order_id = document.querySelector('p[data-test=order-confirmation-order-number-text] strong').innerText; if (!order_id && !temp_orderid_rocketfuel) { return; }
-                        var myHeaders = new Headers(); myHeaders.append("Content-Type", "application/json"); const payload = { temporaryOrderId: temp_orderid_rocketfuel, orderId: order_id, storeHash: RocketfuelPaymentEngine.hash, status: orderStatus }
+                        var myHeaders = new Headers(); myHeaders.append("Content-Type", "application/json"); myHeaders.append("merchant-auth", merchant_auth_rocketfuel);
+                        
+                        const payload = { temporaryOrderId: temp_orderid_rocketfuel, orderId: order_id, storeHash: RocketfuelPaymentEngine.hash,uuid }
                         var requestOptions = { method: 'POST', headers: myHeaders, body: JSON.stringify(payload), }; const result = await fetch(serverApiUrl + "/api/sort-order", requestOptions); console.log("Result from swap", { result });
                     } catch (error) { console.error(error?.message); }
                 }, 500);
