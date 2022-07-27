@@ -1,6 +1,6 @@
-(() => {
-    // var serverApiUrl = 'https://bigcommerce.rocketfuelblockchain.com';
-    var serverApiUrl = 'https://e606-146-70-83-71.ngrok.io';
+// (() => {
+    var serverApiUrl = 'https://bigcommerce.rocketfuelblockchain.com';
+    // var serverApiUrl = 'https://e606-146-70-83-71.ngrok.io';
 
      var path = window.location.pathname; let currentPage = path.split('/').pop(); var thisScript = document.currentScript; function paramsToJSON(search) { search = search.substring(1); return JSON.parse('{"' + decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g, '":"') + '"}') }
     var RocketfuelPaymentEngine = {
