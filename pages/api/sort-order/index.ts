@@ -2,6 +2,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 
 import { runMiddleware } from '@lib/cors';
+// eslint-disable-next-line import/namespace
 import { swapOrder, updateOrderStatus, validateAuth } from '@lib/rkfl';
 
 
@@ -34,11 +35,11 @@ export default async function merchant(req: NextApiRequest, res: NextApiResponse
 
                 let result = {};
                 try {
-                    const validat  = await validateAuth(body.storeHash,headers['merchant-auth'] as string);
-                    console.warn({validat})
-                    
-                    updateResult = await updateOrderStatus(body.storeHash, data.orderId, body.uuid);
-
+                    const validation = await validateAuth(body.storeHash, headers['merchant-auth'] as string);
+                     
+                    if (validation.error === false) {
+                        updateResult = await updateOrderStatus(body.storeHash, data.orderId, body.uuid);
+                    }
                     console.warn({ updateResult });
 
                 } catch (error) {
@@ -46,7 +47,7 @@ export default async function merchant(req: NextApiRequest, res: NextApiResponse
                     console.error("updateOrderStatus", error?.message);
 
                 }
-                if (!updateResult.error) {
+                if (updateResult && !updateResult.error) {
                     try {
 
                         result = await swapOrder(data);
@@ -65,7 +66,7 @@ export default async function merchant(req: NextApiRequest, res: NextApiResponse
                 // const merchantData = await getMerchantData(req);
 
                 res.status(200).json({ updateOrder: updateResult?.status_id, swap: result });
-                
+
             } catch (error) {
 
                 const { message, response } = error;

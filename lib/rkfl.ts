@@ -162,7 +162,7 @@ async function sendSwapRequest(environment, rkflHeaders, merchantAuth, merchantI
 
     const result = await response.json();
 
-    return result?.ok;
+    return result;
 }
 async function swap(environment: string, { orderId, temporaryOrderId }, storeHash: string, merchantData: MerchantData, merchantAuth = ''): Promise<boolean> {
     const rkflHeaders: Headers = new Headers();
@@ -210,9 +210,6 @@ export async function swapOrder({ orderId, temporaryOrderId, storeHash }: { temp
 
     const result = await swap(environment, { orderId, temporaryOrderId }, storeHash, merchantData);
 
-
-
-
     return result;
 }
 export function verifyCallback(data: string, signature: string): boolean {
@@ -240,13 +237,24 @@ export function verifyCallback(data: string, signature: string): boolean {
 
     return isVerified;
 }
-export async function validateAuth(storeHash:string, merchantAuth:string) {
+/**
+ * Placeholder validate!!!
+ * @param storeHash
+ * @param merchantAuth 
+ * @returns 
+ */
+export async function validateAuth(storeHash: string, merchantAuth: string) {
+    if (merchantAuth.length < 300 || merchantAuth.length > 500 || merchantAuth.split("/").length < 2 || !merchantAuth.endsWith('=')) {
+        return { error: true }
+    }
+    
+return { error: false }
 
-    const merchantData = await getMerchantData(storeHash);
+    // const merchantData = await getMerchantData(storeHash);
 
-    const environment = getEnvironment(merchantData.environment);
+    // const environment = getEnvironment(merchantData.environment);
 
-    return await swap(environment, { orderId:'', temporaryOrderId:'' }, storeHash, merchantData, merchantAuth)
+    // return await swap(environment, { orderId: '', temporaryOrderId: '' }, storeHash, merchantData, merchantAuth)
 }
 export async function updateOrderStatus(storeHash, orderId, uuid) {
 
