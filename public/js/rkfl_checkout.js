@@ -1,4 +1,4 @@
-// (() => {
+(() => {
     var serverApiUrl = 'https://bigcommerce.rocketfuelblockchain.com';
     // var serverApiUrl = 'https://e606-146-70-83-71.ngrok.io';
 
