@@ -265,11 +265,15 @@ export async function updateOrderStatus(storeHash, orderId, uuid) {
 
         const environment = getEnvironment(merchantData.environment);
 
-        const resultAuthLogin = await autologin(storeHash)
+        const resultAuthLogin = await autologin(storeHash);
+        console.warn("Result of login?",{resultAuthLogin})
         if (resultAuthLogin.error) return { error: true, message: 'Could not verify merchant' }
 
         const confirmation = await getInvoiceData(environment, uuid);
         const txData = await getTransactions(environment, resultAuthLogin);
+
+        console.warn("Were we able to get transaction?",{txData})
+
         if (txData.error) return { error: true, message: 'Could not get transactions' }
         // console.warn(JSON.stringify(txData.result.txs,null,4));
         const foundTx = txData.result.txs.find((tx) =>
@@ -303,6 +307,8 @@ export async function updateOrderStatus(storeHash, orderId, uuid) {
 
 
         const response = await bigcommerce.put(`/orders/${orderId}`, payload);
+
+        console.warn("Response from Bigcommerce Update?",{response})
 
 
         return response;

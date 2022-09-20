@@ -16,7 +16,7 @@ export default async function transaction(req: NextApiRequest, res: NextApiRespo
         case 'POST':
             try {
 
-                // console.warn({webhook:body});
+                console.warn({webhook:body});
                 const data = body.data;
 
                 const signature = body.signature;
@@ -26,6 +26,7 @@ export default async function transaction(req: NextApiRequest, res: NextApiRespo
                 const isVerified = verifyCallback(data.data, signature)
 
 
+                console.warn("Was callback verified?", {isVerified});
 
 
                 if (!isVerified) {
@@ -61,6 +62,7 @@ export default async function transaction(req: NextApiRequest, res: NextApiRespo
                 if (status !== 7) {
 
                     result = await updateOrderStatus(storeHash, data.offerId, status);
+                    console.warn("Is the order status updated?",{result})
 
                 } else {// do not update if payment status is not confirmed
                     result = { received: true }
