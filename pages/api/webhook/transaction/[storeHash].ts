@@ -16,7 +16,7 @@ export default async function transaction(req: NextApiRequest, res: NextApiRespo
         case 'POST':
             try {
 
-                console.warn({webhook:body});
+                console.warn({ webhook: body });
                 const data = body.data;
 
                 const signature = body.signature;
@@ -26,7 +26,7 @@ export default async function transaction(req: NextApiRequest, res: NextApiRespo
                 const isVerified = verifyCallback(data.data, signature)
 
 
-                console.warn("Was callback verified?", {isVerified});
+                console.warn("Was callback verified?", { isVerified });
 
 
                 if (!isVerified) {
@@ -36,7 +36,7 @@ export default async function transaction(req: NextApiRequest, res: NextApiRespo
                     return;
                 }
                 let status = 0;
-              
+
                 switch (paymentStatus) {
 
                     case 1:
@@ -62,7 +62,7 @@ export default async function transaction(req: NextApiRequest, res: NextApiRespo
                 if (status !== 7) {
 
                     result = await updateOrderStatus(storeHash, data.offerId, status);
-                    console.warn("Is the order status updated?",{result})
+                    console.warn("Is the order status updated?", { result })
 
                 } else {// do not update if payment status is not confirmed
                     result = { received: true }
@@ -79,13 +79,13 @@ export default async function transaction(req: NextApiRequest, res: NextApiRespo
             }
             break;
         case 'GET':
-            res.status(200).json('success');
+            res.status(200).json({ success: 'success' });
             break;
         case 'OPTION':
-            res.status(200).json('success');
+            res.status(200).json({ success: 'success' });
             break;
         default:
-            res.setHeader('Allow', ['POST', 'GET','OPTION']);
+            res.setHeader('Allow', ['POST', 'GET', 'OPTION']);
             res.status(405).end(`Method ${method} Not Allowed`);
     }
 
