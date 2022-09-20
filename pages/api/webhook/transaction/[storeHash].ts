@@ -85,7 +85,7 @@ export default async function transaction(req: NextApiRequest, res: NextApiRespo
             res.status(200).json('success');
             break;
         default:
-            res.setHeader('Allow', ['POST', 'GET']);
+            res.setHeader('Allow', ['POST', 'GET','OPTION']);
             res.status(405).end(`Method ${method} Not Allowed`);
     }
 
