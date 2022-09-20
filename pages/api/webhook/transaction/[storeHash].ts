@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { runMiddleware } from '@lib/cors';
 
-import { updateOrderStatus, verifyCallback } from '@lib/rkfl';
+import { txWebhook, verifyCallback } from '@lib/rkfl';
 
 export default async function transaction(req: NextApiRequest, res: NextApiResponse) {
     await runMiddleware(req, res);
@@ -35,42 +35,43 @@ export default async function transaction(req: NextApiRequest, res: NextApiRespo
 
                     return;
                 }
-                let status = 0;
 
-                switch (paymentStatus) {
+                // switch (paymentStatus) {
 
-                    case 1:
-                        status = 11;
+                //     case 1:
+                //         status = 11;
 
-                        break;
-                    case 101:
-                        status = 12;
+                //         break;
+                //     case 101:
+                //         status = 12;
 
-                        break;
-                    case -1:
-                        status = 6;
+                //         break;
+                //     case -1:
+                //         status = 6;
 
-                        break;
-                    case 0:
-                    default:
-                        status = 7;
-                        break;
-                }
+                //         break;
+                //     case 0:
+                //     default:
+                //         status = 7;
+                //         break;
+                // }
                 let result;
 
 
-                if (status !== 7) {
+                if (paymentStatus !== 0) {
 
-                    result = await updateOrderStatus(storeHash, data.offerId, status);
-                    console.warn("Is the order status updated?", { result })
+                    result = await txWebhook({ storeHash: storeHash.toString(), orderAmount: data.amount, orderId: data.offerId, status:paymentStatus });
+
+                    console.warn("Is the order status updated?", { result:result?.status_id  })
 
                 } else {// do not update if payment status is not confirmed
                     result = { received: true }
                 }
-
+                console.warn("Final result for webhook", { result:result?.status_id })
 
                 res.status(200).json({ result });
             } catch (error) {
+                console.warn("[ webhook error ]", { error })
 
                 const { message, response } = error;
 

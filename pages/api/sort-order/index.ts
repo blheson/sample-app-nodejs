@@ -47,7 +47,7 @@ export default async function merchant(req: NextApiRequest, res: NextApiResponse
                     console.error("updateOrderStatus", error?.message);
 
                 }
-                if (updateResult && !updateResult.error) {
+                // if (updateResult && !updateResult.error) {
                     try {
 
                         result = await swapOrder(data);
@@ -58,7 +58,7 @@ export default async function merchant(req: NextApiRequest, res: NextApiResponse
                         console.error("Swap error", { message: error?.message })
 
                     }
-                }
+                // }
 
 
                 // const result = { uuid, merchantAuth, environment, temporaryOrderId };

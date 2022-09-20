@@ -1,6 +1,6 @@
 import * as crypto from 'crypto';
 import { getEncrypted } from '../lib/merchant';
-import { MerchantData, RKFLPayload } from '../types';
+import { MerchantData, orderPayload, RKFLPayload } from '../types';
 
 import { bigcommerceClient, publicKey } from './auth';
 
@@ -247,14 +247,22 @@ export async function validateAuth(storeHash: string, merchantAuth: string) {
     if (merchantAuth.length < 300 || merchantAuth.length > 500 || merchantAuth.split("/").length < 2 || !merchantAuth.endsWith('=')) {
         return { error: true }
     }
-    
-return { error: false }
+
+    return { error: false }
 
     // const merchantData = await getMerchantData(storeHash);
 
     // const environment = getEnvironment(merchantData.environment);
 
     // return await swap(environment, { orderId: '', temporaryOrderId: '' }, storeHash, merchantData, merchantAuth)
+}
+export async function txWebhook(payl: orderPayload) {
+
+    // const payl = { storeHash, orderId, orderAmount: amount, status };
+
+    console.warn("Data for updating bigcommerce:", payl);
+
+    return await updateBigcommerceOrder(payl);
 }
 export async function updateOrderStatus(storeHash, orderId, uuid) {
 
@@ -266,55 +274,73 @@ export async function updateOrderStatus(storeHash, orderId, uuid) {
         const environment = getEnvironment(merchantData.environment);
 
         const resultAuthLogin = await autologin(storeHash);
-        console.warn("Result of login?",{resultAuthLogin})
+        console.warn("Result of login?", { resultAuthLogin })
         if (resultAuthLogin.error) return { error: true, message: 'Could not verify merchant' }
 
         const confirmation = await getInvoiceData(environment, uuid);
         const txData = await getTransactions(environment, resultAuthLogin);
 
-        console.warn("Were we able to get transaction?",{txData})
+        console.warn("Were we able to get transaction?", { txData })
 
         if (txData.error) return { error: true, message: 'Could not get transactions' }
         // console.warn(JSON.stringify(txData.result.txs,null,4));
         const foundTx = txData.result.txs.find((tx) =>
             tx.hostedPage.uuid === uuid
         )
-        const mappedStatus = mapStatus(foundTx?.status);
+        const payl = { storeHash, orderId, orderAmount: confirmation.result?.returnval?.amount?.toString(), status: foundTx?.status };
+        console.warn("Data for updating bigcommerce:", payl)
 
-        if (mappedStatus === 0) {
-            // return { error: true, message: 'Order is pending' }
-        }
+        return await updateBigcommerceOrder(payl)
 
         // confirmation.amount
 
         //check amount is same
         //check tx is available and status is okay
-        const accessToken = await db.getStoreToken(storeHash);
-
-        const bigcommerce = bigcommerceClient(accessToken, storeHash, 'v2');
-
-        const data = await bigcommerce.get(`/orders/${orderId}`);
-        if (Number(confirmation.result?.returnval?.amount?.toString()) !== Number(data.total_inc_tax) && Number(confirmation.result?.returnval?.amount?.toString()) !== Number(data.total_ex_tax)) {
-            console.warn(confirmation.result?.returnval?.amount?.toString(), "confirmation.result?.returnval?.amount?.toString()", data.total_inc_tax, " data.total_inc_tax", data.total_ex_tax)
-
-            return { error: true, message: 'Error with order _' }
-
-        }
-
-        const payload = {
-            status_id: mappedStatus
-        }
 
 
-        const response = await bigcommerce.put(`/orders/${orderId}`, payload);
-
-        console.warn("Response from Bigcommerce Update?",{response})
-
-
-        return response;
+        // return response;
 
     } catch (error) {
         return { error: true, message: 'Error with sorting: ' + error?.message }
 
     }
+
+}
+
+async function updateBigcommerceOrder({ storeHash, orderId, orderAmount, status }: orderPayload) {
+
+    const mappedStatus = mapStatus(status);
+
+    if (mappedStatus === 0) {
+
+        // return { error: true, message: 'Order is pending' };
+
+    }
+
+    const accessToken = await db.getStoreToken(storeHash);
+    
+    console.warn({ accessToken, storeHash,orderId });
+
+    const bigcommerce = bigcommerceClient(accessToken, storeHash, 'v2');
+
+    const data = await bigcommerce.get(`/orders/${orderId}`);
+
+    console.warn(orderAmount, "orderAmount", data.total_inc_tax, " data.total_inc_tax", data.total_ex_tax);
+
+    if (Number(orderAmount) !== Number(data.total_inc_tax) && Number(orderAmount) !== Number(data.total_ex_tax)) {
+
+        return { error: true, message: 'Error with order _' }
+
+    }
+
+    const payload = {
+        status_id: mappedStatus
+    }
+
+    const response = await bigcommerce.put(`/orders/${orderId}`, payload);
+
+    console.warn("Response from Bigcommerce Update?", { response });
+
+    return response;
+
 }

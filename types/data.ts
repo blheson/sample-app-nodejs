@@ -34,3 +34,10 @@ export interface ListItem extends FormData {
 export interface StringKeyValue {
     [key: string]: string;
 }
+
+export interface orderPayload {
+    storeHash: string,
+    orderId: string,
+    orderAmount: string|number,
+    status: number
+}
