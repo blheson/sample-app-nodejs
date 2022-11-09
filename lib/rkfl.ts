@@ -1,4 +1,5 @@
 import * as crypto from 'crypto';
+import { ORDER_STATUS } from '../consts/status';
 import { getEncrypted } from '../lib/merchant';
 import { MerchantData, orderPayload, RKFLPayload } from '../types';
 
@@ -37,16 +38,18 @@ async function getMerchantData(storeHash): Promise<MerchantData> {
 
 }
 function mapStatus(status: number) {
+
     switch (status) {
-        case 101:
-            return 12
+
+        case ORDER_STATUS.RKFL_PARTIAL:
+            return ORDER_STATUS.BG_ON_HOLD //on hold
             break;
-        case 1:
-            return 11;
-        case -1:
-            return 6
+        case ORDER_STATUS.RKFL_SUCCESS:
+            return ORDER_STATUS.BG_AWAITING_FULFILMENT; //awaiting fulfilment
+        case ORDER_STATUS.RKFL_DECLINED:
+            return ORDER_STATUS.BG_DECLINED //declined
         default:
-            return 0
+            return ORDER_STATUS.BG_AWAITING_PAYMENT //awaiting payment
             break;
     }
 }
@@ -230,8 +233,9 @@ export function verifyCallback(data: string, signature: string): boolean {
 
     // Calling end method
     verify.end();
+    const localPubKey = publicKey as crypto.KeyLike
     // Prints true if verified else false
-    const isVerified = verify.verify(publicKey, signature, 'base64');
+    const isVerified = verify.verify(localPubKey, signature, 'base64');
 
 
 
@@ -311,15 +315,15 @@ async function updateBigcommerceOrder({ storeHash, orderId, orderAmount, status 
 
     const mappedStatus = mapStatus(status);
 
-    if (mappedStatus === 0) {
+    if (mappedStatus === 7) {
 
         // return { error: true, message: 'Order is pending' };
 
     }
 
     const accessToken = await db.getStoreToken(storeHash);
-    
-    console.warn({ accessToken, storeHash,orderId });
+
+    console.warn({ accessToken, storeHash, orderId });
 
     const bigcommerce = bigcommerceClient(accessToken, storeHash, 'v2');
 
@@ -329,7 +333,7 @@ async function updateBigcommerceOrder({ storeHash, orderId, orderAmount, status 
 
     if (Number(orderAmount) !== Number(data.total_inc_tax) && Number(orderAmount) !== Number(data.total_ex_tax)) {
 
-        return { error: true, message: 'Error with order _',data:{orderAmount,dataTax:data.total_inc_tax,dataexTax:data.total_ex_tax} }
+        return { error: true, message: 'Error with order _', data: { orderAmount, dataTax: data.total_inc_tax, dataexTax: data.total_ex_tax } }
 
     }
 

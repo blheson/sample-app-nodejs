@@ -1,6 +1,7 @@
 (() => {
-    var serverApiUrl = 'https://bigcommerce.rocketfuelblockchain.com';
-
+    // var serverApiUrl = 'https://bigcommerce.rocketfuelblockchain.com';
+    var serverApiUrl = 'https://506b-102-89-23-128.ngrok.io';
+    
      var path = window.location.pathname; let currentPage = path.split('/').pop(); var thisScript = document.currentScript; function paramsToJSON(search) { search = search.substring(1); return JSON.parse('{"' + decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g, '":"') + '"}') }
     var RocketfuelPaymentEngine = {
         order_id: '', url: new URL(window.location.href), hash: '', watchIframeShow: false, rkflConfig: null, buttonEventAdded: false, user_data: { email: null }, loading: false, response: { uuid: '', temporary_order_id: '' }, getEnvironment: function () { return RocketfuelPaymentEngine.response?.environment || 'prod'; }, getUserData: function () {
@@ -82,7 +83,10 @@
         RocketfuelPaymentEngine.init();
     }
     function handleClick(e) {
-        if (!e.target.id || e.target.id === 'rkfl-btn-place-order' || e.target.id === 'checkout-payment-continue') { return }
+      
+        const excludedIds = ['terms','rkfl-btn-place-order','checkout-payment-continue'];
+      
+        if (!e.target?.id || excludedIds.includes(e.target.id)) { return }
         if (e.target.id === 'radio-moneyorder') {
             if (!document.getElementById('rkfl-btn-place-order')) { createPlaceOrderButton() }
             document.getElementById('checkout-payment-continue').style.visibility = 'hidden'

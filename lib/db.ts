@@ -6,13 +6,13 @@ let db: Db;
 
 switch (DB_TYPE) {
     case 'firebase':
-        db = require('./dbs/firebase');
+        db = require('./dbs/mysql');
         break;
     case 'mysql':
         db = require('./dbs/mysql');
         break;
     default:
-        db = require('./dbs/firebase');
+        db = require('./dbs/mysql');
         break;
 }
 

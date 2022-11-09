@@ -21,7 +21,7 @@ export interface Db {
     setMerchant(storeHash: string, merchantData: MerchantData): Promise<void>;
     getMerchant(context: string): Promise<[]>;
     getStore(): StoreData | null;
-    getStoreToken(storeId: string): string | null;
+    getStoreToken(storeId: string): string ;
     deleteStore(session: SessionProps): Promise<void>;
     deleteUser(session: SessionProps): Promise<void>;
 }

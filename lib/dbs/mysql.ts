@@ -60,7 +60,7 @@ export async function setStoreUser(session: SessionProps) {
     } else {
         // Create a new user if it doesn't exist (non-store owners added here for multi-user apps)
         if (!storeUser.length) {
-            await query('INSERT INTO storeUsers SET ?', { isAdmin: owner.id === userId, storeHash, userId });
+            await query('INSERT INTO storeUsers SET ?', { isAdmin: owner?.id === userId, storeHash, userId });
         }
     }
 }

@@ -16,6 +16,7 @@ if (API_URL && LOGIN_URL) {
 
 // Create BigCommerce instance
 // https://github.com/bigcommerce/node-bigcommerce/
+console.warn("Current Auth Callback", {AUTH_CALLBACK})
 const bigcommerce = new BigCommerce({
     logLevel: 'info',
     clientId: CLIENT_ID,
