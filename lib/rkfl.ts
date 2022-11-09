@@ -329,7 +329,7 @@ async function updateBigcommerceOrder({ storeHash, orderId, orderAmount, status 
 
     if (Number(orderAmount) !== Number(data.total_inc_tax) && Number(orderAmount) !== Number(data.total_ex_tax)) {
 
-        return { error: true, message: 'Error with order _' }
+        return { error: true, message: 'Error with order _',data:{orderAmount,dataTax:data.total_inc_tax,dataexTax:data.total_ex_tax} }
 
     }
 
