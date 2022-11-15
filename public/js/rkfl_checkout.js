@@ -94,7 +94,7 @@
                 }
 
 
-                RocketfuelPaymentEngine.user_data.email = theIndex.email; cart = sortCart({ cart: theIndex.lineItems, shipping: { amount: checkoutResult?.shippingCostTotal } }); let payload = { currency: theIndex.currency.code, cart, amount: getcheckoutTotal(theIndex.baseAmount, checkoutResult?.shippingCostTotal) }
+                RocketfuelPaymentEngine.user_data.email = theIndex.email; cart = sortCart({ cart: theIndex.lineItems, shipping: { amount: checkoutResult?.shippingCostTotal } }); let payload = { currency: theIndex.currency.code, cart, amount:checkoutResult?.grandTotal || getcheckoutTotal(theIndex.baseAmount, checkoutResult?.shippingCostTotal) }
                 console.warn('[DATA_GENERATED]', { payload });
                 payload = { ...payload, storeHash: RocketfuelPaymentEngine.hash }
                 var myHeaders = new Headers(); myHeaders.append("Content-Type", "application/json"); var requestOptions = { method: 'POST', headers: myHeaders, body: JSON.stringify(payload) }; let uuidResponse = await fetch(serverApiUrl + "/api/payment", requestOptions); let uuidResult = await uuidResponse.json();
