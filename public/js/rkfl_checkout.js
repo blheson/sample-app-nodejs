@@ -1,6 +1,5 @@
 (() => {
-    // var serverApiUrl = 'https://bigcommerce.rocketfuelblockchain.com';
-    var serverApiUrl = 'https://bbe7-102-89-22-234.ngrok.io';
+    var serverApiUrl = 'https://bigcommerce.rocketfuelblockchain.com';
     var btnId = 'rkfl-btn-place-order';
     var btnText = 'PLACE ORDER WITH ROCKETFUEL';
     var path = window.location.pathname; let currentPage = path.split('/').pop(); var thisScript = document.currentScript; function paramsToJSON(search) { search = search.substring(1); return JSON.parse('{"' + decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g, '":"') + '"}') }
@@ -212,4 +211,4 @@
         sortSuccessPage();
     }
 })();
-console.log('v1.0.1')
+console.log('v1.0.1.fix_edition.1')
