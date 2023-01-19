@@ -41,3 +41,11 @@ export interface orderPayload {
     orderAmount: string|number,
     status: number
 }
+export interface UUIDResponse{
+    merchantAuth: string, 
+    uuid:string, 
+    environment: string,
+    temporaryOrderId:
+    string,
+    isPartial?:boolean
+}
