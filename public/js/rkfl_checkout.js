@@ -354,9 +354,10 @@
                         const result = await response.json()
                         console.log("Result from swap", { result });
                     } catch (error) { console.error(error?.message); }
+                         localStorage.removeItem('temp_orderid_rocketfuel'); //remove to avoid triggering partial payment
                 }, 500);
             }
-                 localStorage.removeItem('temp_orderid_rocketfuel'); //remove to avoid triggering partial payment
+            
         }
         sortSuccessPage();
     }
