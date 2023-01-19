@@ -361,4 +361,4 @@
         sortSuccessPage();
     }
 })();
-console.log('v1.0.1.fix_edition.1')
+console.log('v1.0.2')
