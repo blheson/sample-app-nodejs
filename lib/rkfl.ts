@@ -1,7 +1,7 @@
 import * as crypto from 'crypto';
 import { ORDER_STATUS } from '../consts/status';
 import { getEncrypted } from '../lib/merchant';
-import { MerchantData, orderPayload, RKFLPayload } from '../types';
+import { MerchantData, orderPayload, RKFLPayload, UUIDResponse } from '../types';
 
 import { bigcommerceClient, publicKey } from './auth';
 
@@ -105,15 +105,16 @@ async function getInvoiceData(environment: string, uuid: string): Promise<any> {
 }
 async function autologin(storeHash) {
 
-    const merchantData = await getMerchantData(storeHash);
-
-    const environment = getEnvironment(merchantData.environment);
-
-
-    return await login(environment, merchantData);
+    return await login(storeHash);
 }
-async function login(environment: string, { email, password }: MerchantData): Promise<{ access: string, error?: boolean }> {
-    const raw = { email, password };
+async function login(storeHash): Promise<{ access: string, error?: boolean }> {
+   
+     const merchantData = await getMerchantData(storeHash);
+
+     const environment = getEnvironment(merchantData.environment);
+ 
+ 
+    const raw = { email:merchantData.email, password:merchantData.password };
     const myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
     const response = await fetch(environment + '/auth/login', {
@@ -129,6 +130,33 @@ async function login(environment: string, { email, password }: MerchantData): Pr
     }
 
     return { access: result.result.access };
+
+}
+
+async function purchaseTxPartial(access: string, { tempOrderId, uuid,storeHash }: any): Promise<{ok:boolean,result:any}>{
+ 
+    const rkflHeaders: Headers = new Headers();
+    const merchantData = await getMerchantData(storeHash);
+    const merchant_id = merchantData.merchantId
+   
+    const environment = getEnvironment(merchantData.environment);
+
+    rkflHeaders.append("Authorization", "Bearer " + access);
+
+    rkflHeaders.append("Content-Type", "application/json");
+
+    const requestOptions: RequestInit = {
+        method: 'GET',
+        headers: rkflHeaders,
+       
+    };
+
+    const response = await fetch(environment + '/purchase/transaction/partials/'+merchant_id+'?offerId='+tempOrderId+'&hostedPageId='+uuid,requestOptions);
+
+    const result = await response.json();
+
+
+    return result
 
 }
 async function charge(access: string, environment, { merchantId: merchant_id }: MerchantData, { amount, cart, currency, orderId: order, redirectUrl }: RKFLPayload): Promise<{ uuid: string }> {
@@ -185,6 +213,128 @@ async function swap(environment: string, { orderId, temporaryOrderId }, storeHas
     return await sendSwapRequest(environment, rkflHeaders, merchantAuth, merchantId);
 
 }
+function compareCartPartialTx(externalCart, bGPayload:any):boolean{
+ 
+    if( !externalCart ){
+        return false;
+        
+    }
+    const externalCartInfo = externalCart.check;
+    const bGCart = bGPayload.cart;
+
+    if( !Array.isArray( externalCartInfo ) ){
+        
+        console.warn("Not an array");
+
+        return false;
+    }
+  
+    if( externalCart.nativeAmount < bGPayload.amount ){
+                               
+        console.warn("Compare result native amount is less than total");
+        
+        return false;
+    }
+    
+    if( externalCartInfo.length !== bGCart.length ){
+            
+        console.warn("Compare result native product count disparity");
+        
+        return false;
+
+    }
+ 
+    let flagCompatibleCartProduct = true;
+
+    bGCart.forEach((item)=>{
+
+    
+        const findResult = externalCartInfo.find((cartItem)=>{
+         
+            return cartItem.name === item.name && item.price === cartItem.price;//we use name and price because bigcommerce randomize product Ids
+         
+         })
+         
+         if(!findResult){
+            flagCompatibleCartProduct = false;
+         }
+     })
+  
+ 
+
+    return flagCompatibleCartProduct;
+}
+export async function handleInvoice(body: any): Promise<UUIDResponse>{
+
+    
+  
+    console.warn('[ Check payload for transactions]', {body} );
+
+    console.warn(' IS_PARTIAL_TRANSACTION', body.isPartial !== false && body.tempOrderIdRocketfuel &&
+    body.uuidRocketfuel);
+
+    if(body.isPartial !== false && body.tempOrderIdRocketfuel &&
+        body.uuidRocketfuel){
+        
+        
+        const { access } = await login(body.storeHash);
+        console.warn('PARTIAL_TX_PAYLOAD',
+        {
+            storeHash:body.storeHash,
+            tempOrderId:body.tempOrderIdRocketfuel,
+            uuid:body.uuidRocketfuel
+        }
+        );
+        const partialResponse:any = await  purchaseTxPartial(
+            access,
+            {
+                storeHash:body.storeHash,
+                tempOrderId:body.tempOrderIdRocketfuel,
+                uuid:body.uuidRocketfuel
+            });
+        console.warn(
+            { partialResponse }
+        );
+        const compartCartResult = compareCartPartialTx(partialResponse.result.tx,body);
+        if(partialResponse?.result?.tx){
+
+      
+        console.warn(
+            "IS_PARTIAL_TRANSACTION_VALID",
+            partialResponse.result.tx.status === ORDER_STATUS.RKFL_PARTIAL,
+            partialResponse.result.paymentLinkStatus ===ORDER_STATUS.RKFL_SUCCESS,compartCartResult
+        );
+
+        console.warn('COMBINED_CHECK', partialResponse?.result?.tx && partialResponse.result.tx.status === ORDER_STATUS.RKFL_PARTIAL && partialResponse.result.paymentLinkStatus === ORDER_STATUS.RKFL_SUCCESS && compartCartResult)
+
+        if( partialResponse?.result?.tx && 
+            partialResponse.result.tx.status === ORDER_STATUS.RKFL_PARTIAL && 
+            partialResponse.result.paymentLinkStatus === ORDER_STATUS.RKFL_SUCCESS &&
+             compartCartResult){
+             
+        const merchantData = await getMerchantData(body.storeHash);
+
+                return {
+                     merchantAuth: await getEncrypted(merchantData.merchantId), uuid:body.uuidRocketfuel, environment: merchantData.environment,temporaryOrderId:body.tempOrderIdRocketfuel ,isPartial:true
+                    };
+            }
+        }
+     
+    }
+    const temporaryOrderId = new Date().getTime() + new Date().getTime().toString().substring(1, 4);
+
+    const data = {
+        amount: body.amount.toString(),
+        currency: body.currency,
+        orderId: temporaryOrderId,
+        cart: body.cart,
+        storeHash: body.storeHash,
+        redirectUrl: ''
+    }
+    const result  = await getUUID(data);
+    
+    return {...result,temporaryOrderId};
+}
 
 export async function getUUID(payload: RKFLPayload): Promise<{ merchantAuth: string, uuid: string, environment: string, error?: boolean, message?: string }> {
 
@@ -193,7 +343,7 @@ export async function getUUID(payload: RKFLPayload): Promise<{ merchantAuth: str
     const environment = getEnvironment(merchantData.environment);
 
 
-    const { access, error } = await login(environment, merchantData);
+    const { access, error } = await login(payload.storeHash);
 
     if (error === true) {
         return { merchantAuth: '', uuid: '', environment: '', error: true, message: 'Could not verify merchant login details' };

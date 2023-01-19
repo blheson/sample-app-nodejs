@@ -2,7 +2,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { runMiddleware } from '@lib/cors';
 
-import { getUUID } from '../../../lib/rkfl';
+import { handleInvoice } from '../../../lib/rkfl';
 
 
 // Initializing the cors middleware
@@ -41,25 +41,17 @@ export default async function merchant(req: NextApiRequest, res: NextApiResponse
 
                     return;
                 }
+ 
+                const result = await handleInvoice(body)
 
-                const temporaryOrderId = new Date().getTime() + new Date().getTime().toString().substring(1, 4);
-                const data = {
-                    'amount': body.amount.toString(),
-                    'currency': body.currency,
-                    'orderId': temporaryOrderId,
-                    'cart': body.cart,
-                    'storeHash': body.storeHash,
-                    'redirectUrl': ''
-                }
-
-                const result = await getUUID(data);
+                // const result = await getUUID(data);
                 // const result = { uuid, merchantAuth, environment, temporaryOrderId };
 
                 // const bigcommerce = bigcommerceClient(accessToken, storeHash);
 
                 // const merchantData = await getMerchantData(req);
-
-                res.status(200).json({...result,temporaryOrderId});
+ 
+                res.status(200).json(result);
             } catch (error) {
 
                 const { message, response } = error;

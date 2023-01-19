@@ -31,14 +31,101 @@
                     default: break;
                 }
             })
-        }, setLocalStorage: function (key, value) { localStorage.setItem(key, value); }, initRocketFuel: async function () {
+        }, setLocalStorage: function (key, value) { localStorage.setItem(key, value); },
+        getLocalStorage: function (key) { return localStorage.getItem(key); },
+         createElementAbstract: {
+            partialPaymentNotificationModal: function () {
+                //UNDERLAY
+                const rkflPaymentPartialAlertModalUnderlay = document.createElement('div');
+                rkflPaymentPartialAlertModalUnderlay.style.cssText = 'background: #00000070;position: fixed;top: 0;right: 0;height: 100%;width: 100%;'
+
+                //MODAL
+                const rkflPaymentPartialAlertModal = document.createElement('div');
+                rkflPaymentPartialAlertModal.style.cssText = 'max-width: 400px; margin: auto; background: rgb(255, 255, 255); padding: 20px; margin-top: 20vh;'
+
+                //MODAL CONTENT
+                const rkflPaymentPartialAlertModalContent = document.createElement('div');
+                rkflPaymentPartialAlertModalContent.innerText = 'You have already made partial payment on this order item. Are you sure to continue payment on the existing order?';
+
+                //MODAL CONTENT BUTTON
+                const rkflPaymentPartialAlertModalContentButton = document.createElement('div');
+                rkflPaymentPartialAlertModalContentButton.style.cssText = 'display: flex; justify-content: space-around; margin-top: 20px; text-align: center; font-size: 14px;';
+
+                //MODAL CONTENT BUTTON REJECT
+                const rkflButtonReject = document.createElement('span');
+                rkflButtonReject.innerText = 'No';
+                rkflButtonReject.style.cssText = 'border: 2px solid #f0833c; padding: 6px 15px;width:120px;cursor:pointer';
+
+                //MODAL CONTENT BUTTON ACCEPT
+                const rkflButtonAccept = document.createElement('span');
+                rkflButtonAccept.innerText = 'Yes, Continue';
+                rkflButtonAccept.style.cssText = 'background:#f0833c; padding: 6px 15px;color:#fff;width:120px;cursor:pointer';
+
+                return {
+                    rkflPaymentPartialAlertModalUnderlay,
+                    rkflPaymentPartialAlertModal,
+                    rkflPaymentPartialAlertModalContent,
+                    rkflPaymentPartialAlertModalContentButton,
+                    rkflButtonReject,
+                    rkflButtonAccept
+                }
+            },
+            clearAppendedDom:(element)=>{
+                element.remove();
+            }
+        },
+        userAgreeToPartialPayment: async function (){
+            return new Promise((resolve, reject) =>{
+                try {
+                    const {   
+                        rkflPaymentPartialAlertModalUnderlay,
+                        rkflPaymentPartialAlertModal,
+                        rkflPaymentPartialAlertModalContent,
+                        rkflPaymentPartialAlertModalContentButton,
+                        rkflButtonReject,
+                        rkflButtonAccept 
+                    } = RocketfuelPaymentEngine.createElementAbstract.partialPaymentNotificationModal();
+    
+                    rkflButtonReject.addEventListener('click', () => {
+                        RocketfuelPaymentEngine.createElementAbstract.clearAppendedDom(rkflPaymentPartialAlertModalUnderlay)
+                        resolve(false)
+                    });
+    
+    
+                    rkflButtonAccept.addEventListener('click', () => {
+                        RocketfuelPaymentEngine.createElementAbstract.clearAppendedDom(rkflPaymentPartialAlertModalUnderlay)
+    
+                        resolve(true)
+                    });
+    
+                    //APPEND ACTIONS
+                    rkflPaymentPartialAlertModalContentButton.appendChild(rkflButtonReject);
+                    rkflPaymentPartialAlertModalContentButton.appendChild(rkflButtonAccept);
+    
+                    rkflPaymentPartialAlertModal.appendChild(rkflPaymentPartialAlertModalContent);
+                    rkflPaymentPartialAlertModal.appendChild(rkflPaymentPartialAlertModalContentButton);
+    
+    
+                    rkflPaymentPartialAlertModalUnderlay.appendChild(rkflPaymentPartialAlertModal);
+                    document.body.appendChild(rkflPaymentPartialAlertModalUnderlay);
+    
+                } catch (error) {
+                    console.log(error.message)
+                    resolve(false)
+                }
+            })
+        },
+        initRocketFuel: async function () {
             return new Promise(async (resolve, reject) => {
                 if (!RocketFuel) { location.reload(); reject(); }
                 let userData = RocketfuelPaymentEngine.getUserData(); let payload, response, rkflToken; RocketfuelPaymentEngine.rkfl = new RocketFuel({ environment: RocketfuelPaymentEngine.getEnvironment() });
                 if (!RocketfuelPaymentEngine.response) {
                     await initUUID;
                 }
-                let uuid = RocketfuelPaymentEngine.response.uuid; RocketfuelPaymentEngine.rkflConfig = { uuid, callback: RocketfuelPaymentEngine.updateOrder, environment: RocketfuelPaymentEngine.getEnvironment() }
+                let uuid = RocketfuelPaymentEngine.response.uuid;
+                if(!uuid){
+                    reject('UUID Not found');
+                } RocketfuelPaymentEngine.rkflConfig = { uuid, callback: RocketfuelPaymentEngine.updateOrder, environment: RocketfuelPaymentEngine.getEnvironment() }
                 if (userData.firstName && userData.email) {
                     payload = { firstName: userData.firstName, lastName: userData.lastName, email: userData.email, merchantAuth: RocketfuelPaymentEngine.response.merchantAuth, kycType: 'null', kycDetails: { 'DOB': "01-01-1990" } }
                     try {
@@ -57,7 +144,8 @@
             await initUUID();
             let engine = this; console.log('Start initiating RKFL'); try { let res = await engine.initRocketFuel(); } catch (error) { console.log('error from promise', error); }
             console.log('Done initiating RKFL'); engine.windowListener(); engine.startPayment();
-        }
+        },
+        
     }
     function getcheckoutTotal(cart, shipping) {
         if (!shipping) {
@@ -79,6 +167,7 @@
         }
         return [...customItems, ...digitalItems, ...giftCertificates, ...physicalItems, ...shippingItems]
     }
+
     async function initUUID() {
         var requestOptions = { method: 'GET', redirect: 'follow' }; try {
             let rootUrl = window.location.origin; let response = await fetch(rootUrl + "/api/storefront/carts", requestOptions);
@@ -92,19 +181,78 @@
                 } catch (error) {
                     console.error('[COULDNOT_SHIPPING]', error)
                 }
+               const tempOrderIdRocketfuel = RocketfuelPaymentEngine.getLocalStorage('temp_orderid_rocketfuel');
+                
+               const uuidEmailString = RocketfuelPaymentEngine.getLocalStorage('uuid_email_rocketfuel');
+               
+                const uuidEmail = uuidEmailString ?JSON.parse(uuidEmailString) : {};
 
+                const uuidRocketfuel=uuidEmail?.uuid;
+                console.log('[ CHECK_IS_PARTIAL]', {tempOrderIdRocketfuel , uuidRocketfuel, isValidEmail:theIndex.email === uuidEmail?.email});
 
-                RocketfuelPaymentEngine.user_data.email = theIndex.email; cart = sortCart({ cart: theIndex.lineItems, shipping: { amount: checkoutResult?.shippingCostTotal } }); let payload = { currency: theIndex.currency.code, cart, amount: getcheckoutTotal(theIndex.baseAmount, checkoutResult?.shippingCostTotal) }
-                console.warn('[DATA_GENERATED]', { payload });
-                payload = { ...payload, storeHash: RocketfuelPaymentEngine.hash }
-                var myHeaders = new Headers(); myHeaders.append("Content-Type", "application/json"); var requestOptions = { method: 'POST', headers: myHeaders, body: JSON.stringify(payload) }; let uuidResponse = await fetch(serverApiUrl + "/api/payment", requestOptions); let uuidResult = await uuidResponse.json();
+                const isPartial = !!tempOrderIdRocketfuel && !!uuidRocketfuel && (theIndex.email === uuidEmail?.email);
+
+                RocketfuelPaymentEngine.user_data.email = theIndex.email; cart = sortCart({ cart: theIndex.lineItems, shipping: { amount: checkoutResult?.shippingCostTotal } });
+              
+                // let uuidResult  = await getUUIDFromAPI({
+                //     theIndex,
+                //     cart,
+                //     checkoutResult,
+                //     isPartial:true,
+                //     tempOrderIdRocketfuel:'ee2e58d4-cc0b-465f-8da4-4c1899781c79',
+                //     uuidRocketfuel:'30bd161f-aa9c-4f22-a7c6-5c22671f7e79'
+                // });
+                let uuidResult  = await getUUIDFromAPI({
+                    theIndex,
+                    cart,
+                    checkoutResult,
+                    isPartial,
+                    tempOrderIdRocketfuel,
+                    uuidRocketfuel
+                });
+
+                //check partial payment
+                if( uuidResult.isPartial ){
+                    
+                    const userAgreed = await RocketfuelPaymentEngine.userAgreeToPartialPayment();
+
+                    if ( ! userAgreed ) {
+                        
+                        uuidResult = await getUUIDFromAPI({
+                            theIndex,
+                            cart,
+                            checkoutResult,
+                            isPartial:false
+                        }); //set uuid
+                
+                        // uuid = result.uuid;
+
+                        console.log({uuidResult},'User did not agree');
+
+                        // isPartial = result.isPartial;
+                    }else{
+
+                        console.log('User agreed');
+
+                    }
+                }
+
                 RocketfuelPaymentEngine.response = uuidResult
 
                 RocketfuelPaymentEngine.setLocalStorage('merchant_auth_rocketfuel', RocketfuelPaymentEngine.response.merchantAuth)
                 RocketfuelPaymentEngine.setLocalStorage('temp_orderid_rocketfuel', RocketfuelPaymentEngine.response.temporaryOrderId)
-                RocketfuelPaymentEngine.setLocalStorage('uuid_rocketfuel', RocketfuelPaymentEngine.response.uuid)
+                RocketfuelPaymentEngine.setLocalStorage('uuid_email_rocketfuel', JSON.stringify({email: RocketfuelPaymentEngine.user_data.email,uuid : RocketfuelPaymentEngine.response.uuid}))
             }
         } catch (error) { console.error('error from init', error) }
+
+        async function getUUIDFromAPI({theIndex, cart, checkoutResult,tempOrderIdRocketfuel,
+             uuidRocketfuel,isPartial=true}) {
+            let payload = { currency: theIndex.currency.code, cart, amount: checkoutResult?.grandTotal || getcheckoutTotal(theIndex.baseAmount, checkoutResult?.shippingCostTotal),isPartial,...(isPartial && {uuidRocketfuel,tempOrderIdRocketfuel})};
+            console.warn('[DATA_GENERATED]', { payload });
+            payload = { ...payload, storeHash: RocketfuelPaymentEngine.hash };
+            var myHeaders = new Headers(); myHeaders.append("Content-Type", "application/json"); var requestOptions = { method: 'POST', headers: myHeaders, body: JSON.stringify(payload) }; let uuidResponse = await fetch(serverApiUrl + "/api/payment", requestOptions); let uuidResult = await uuidResponse.json();
+            return uuidResult ;
+        }
     }
     function handlePlaceOrderButton(e) {
         e.preventDefault(); console.log("Default prevented, Loading status", RocketfuelPaymentEngine.loading); if (RocketfuelPaymentEngine.loading === true)
@@ -157,7 +305,7 @@
         })
     }
     if (currentPage.includes('checkout')) {
-        localStorage.removeItem('temp_orderid_rocketfuel');
+
         localStorage.removeItem('merchant_auth_rocketfuel');
         function createPlaceOrderButton() {
             if (document.getElementById(btnId)) { return; }
@@ -174,7 +322,7 @@
                 if (thisScript) {
                     clearInterval(scriptUrlInterval); var script_url = thisScript.src; let search = script_url.replace(serverApiUrl + `/js/rkfl_checkout.js`, ''); let par = paramsToJSON(search)
                     RocketfuelPaymentEngine.hash = par['storeHash'];
-                    // await initUUID(); 
+                
                     console.log("Rocketfuel now ready----->");
                 }
             }, 2000); let formChecklist = setInterval(() => { if (document.querySelector('.form-checklist.optimizedCheckout-form-checklist')) { clearInterval(formChecklist); document.getElementById('checkout-app').addEventListener('click', handleClick, false); } }, 2000)
@@ -190,11 +338,12 @@
     }
     if (currentPage.includes('order-confirmation')) {
 
-        let uuid = localStorage.getItem('uuid_rocketfuel');
+        let uuidEmail = localStorage.getItem('uuid_email_rocketfuel');
         let merchant_auth_rocketfuel = localStorage.getItem('merchant_auth_rocketfuel');
 
         async function sortSuccessPage() {
-            if (uuid) {
+            if (uuidEmail) {
+                const {uuid} = JSON.parse(uuidEmail)
                 const storeHash = await getStoreHash(); let thankyouInter = setInterval(async () => {
                     if (!document.querySelector('p[data-test=order-confirmation-order-status-text]')) return; document.querySelector('p[data-test=order-confirmation-order-status-text]').innerHTML = 'Your order has been received, An email will be sent containing information about your purchase.'; document.querySelector('div[data-test=payment-instructions]').innerHTML = ''; clearInterval(thankyouInter); try {
                         const temp_orderid_rocketfuel = localStorage.getItem("temp_orderid_rocketfuel"); const order_id = document.querySelector('p[data-test=order-confirmation-order-number-text] strong').innerText; if (!order_id && !temp_orderid_rocketfuel) { return; }
@@ -207,8 +356,9 @@
                     } catch (error) { console.error(error?.message); }
                 }, 500);
             }
+                 localStorage.removeItem('temp_orderid_rocketfuel'); //remove to avoid triggering partial payment
         }
         sortSuccessPage();
     }
 })();
-console.log('v1.0.1.fix_edition.1')
+console.log('v1.0.2')
