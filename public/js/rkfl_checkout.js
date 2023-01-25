@@ -1,7 +1,7 @@
 (() => {
     var serverApiUrl = 'https://bigcommerce.rocketfuelblockchain.com';
     var btnId = 'rkfl-btn-place-order';
-    var btnText = 'PLACE ORDER WITH ROCKETFUEL';
+    var btnText = 'PLACE ORDER';
     var path = window.location.pathname; let currentPage = path.split('/').pop(); var thisScript = document.currentScript; function paramsToJSON(search) { search = search.substring(1); return JSON.parse('{"' + decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g, '":"') + '"}') }
     var RocketfuelPaymentEngine = {
         order_id: '', url: new URL(window.location.href), hash: '', watchIframeShow: false, rkflConfig: null, buttonEventAdded: false, user_data: { email: null }, loading: false, response: { uuid: '', temporary_order_id: '' }, getEnvironment: function () { return RocketfuelPaymentEngine.response?.environment || 'prod'; }, getUserData: function () {
