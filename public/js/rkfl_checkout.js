@@ -289,7 +289,10 @@
                 console.log('We have UUID, no buton disabling and event has been added ')
                 return;
             }
-            document.getElementById(btnId).disabled = true;
+            if(document.getElementById(btnId).disabled){
+                document.getElementById(btnId).disabled = true;
+            }
+          
         }
     }
     function getStoreHash() {
@@ -314,7 +317,8 @@
         }
         let checkPlaceOrder = setInterval(() => {
             if (document.getElementById('radio-moneyorder')) {
-                if (document.getElementById('radio-moneyorder').checked == true) { enableButton(false); }
+                if (document.getElementById('radio-moneyorder').checked == true) { enableButton(false); //set place oder to false heere to **********
+             }
                 clearInterval(checkPlaceOrder);
             }
         }, 1000); let fixIframe = setInterval(() => { if (document.getElementById('iframeWrapper')) { document.getElementById('iframeWrapper').style.position = 'fixed'; clearInterval(fixIframe); } }, 1000); document.addEventListener('DOMContentLoaded', async () => {
@@ -345,7 +349,9 @@
             if (uuidEmail) {
                 const {uuid} = JSON.parse(uuidEmail)
                 const storeHash = await getStoreHash(); let thankyouInter = setInterval(async () => {
-                    if (!document.querySelector('p[data-test=order-confirmation-order-status-text]')) return; document.querySelector('p[data-test=order-confirmation-order-status-text]').innerHTML = 'Your order has been received, An email will be sent containing information about your purchase.'; document.querySelector('div[data-test=payment-instructions]').innerHTML = ''; clearInterval(thankyouInter); try {
+                    if (!document.querySelector('p[data-test=order-confirmation-order-status-text]')) return; 
+                    // document.querySelector('p[data-test=order-confirmation-order-status-text]').innerHTML = 'Your order has been received, An email will be sent containing information about your purchase.'; document.querySelector('div[data-test=payment-instructions]').innerHTML = '';
+                     clearInterval(thankyouInter); try {
                         const temp_orderid_rocketfuel = localStorage.getItem("temp_orderid_rocketfuel"); const order_id = document.querySelector('p[data-test=order-confirmation-order-number-text] strong').innerText; if (!order_id && !temp_orderid_rocketfuel) { return; }
                         var myHeaders = new Headers(); myHeaders.append("Content-Type", "application/json"); myHeaders.append("merchant-auth", merchant_auth_rocketfuel);
 
