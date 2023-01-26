@@ -1,5 +1,6 @@
 (() => {
-    var serverApiUrl = 'https://bigcommerce.rocketfuelblockchain.com';
+    // var serverApiUrl = 'https://bigcommerce.rocketfuelblockchain.com';
+    var serverApiUrl = 'https://4b3e-105-113-16-44.ngrok.io';
     var btnId = 'rkfl-btn-place-order';
     var btnText = 'PLACE ORDER';
     var path = window.location.pathname; let currentPage = path.split('/').pop(); var thisScript = document.currentScript; function paramsToJSON(search) { search = search.substring(1); return JSON.parse('{"' + decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g, '":"') + '"}') }
@@ -153,19 +154,22 @@
         }
         return parseFloat(cart.toString()) + parseFloat(shipping.toString())
     }
-    function sortShipping(amount) {
-        return { 'name': 'Shipping', 'id': 'shipping', 'price': amount, 'quantity': '1' }
+    function sortExtraItem(amount,name='Shipping') {
+        return { name, 'id': name.toLowerCase(), 'price': amount, 'quantity': '1' }
     }
     function sortIndividual(items) { return items.map(item => { return { 'name': item.name, 'id': item.id.toString(), 'price': item.listPrice, 'quantity': item.quantity.toString() } }) }
-    function sortCart({ cart: cartItems, shipping }) {
+    function sortCart({ cart: cartItems, shipping,tax }) {
         let customItems = shippingItems = digitalItems = giftCertificates = physicalItems = []; if (cartItems.customItems.length > 0) { customItems = sortIndividual(cartItems.customItems); }
         if (cartItems.digitalItems.length > 0) { digitalItems = sortIndividual(cartItems.digitalItems); }
         if (cartItems.giftCertificates.length > 0) { giftCertificates = sortIndividual(cartItems.giftCertificates); }
         if (cartItems.physicalItems.length > 0) { physicalItems = sortIndividual(cartItems.physicalItems); }
         if (shipping?.amount && parseFloat(shipping.amount) > 0) {
-            shippingItems = [sortShipping(shipping.amount)]
+            shippingItems = [sortExtraItem(shipping.amount)]
         }
-        return [...customItems, ...digitalItems, ...giftCertificates, ...physicalItems, ...shippingItems]
+        if (tax?.amount && parseFloat(tax.amount) > 0) {
+            taxItems = [sortExtraItem(tax.amount,'Tax')]
+        }
+        return [...customItems, ...digitalItems, ...giftCertificates, ...physicalItems, ...shippingItems,...taxItems]
     }
 
     async function initUUID() {
@@ -192,7 +196,7 @@
 
                 const isPartial = !!tempOrderIdRocketfuel && !!uuidRocketfuel && (theIndex.email === uuidEmail?.email);
 
-                RocketfuelPaymentEngine.user_data.email = theIndex.email; cart = sortCart({ cart: theIndex.lineItems, shipping: { amount: checkoutResult?.shippingCostTotal } });
+                RocketfuelPaymentEngine.user_data.email = theIndex.email; cart = sortCart({ cart: theIndex.lineItems, shipping: { amount: checkoutResult?.shippingCostTotal },tax:{amount:checkoutResult?.taxTotal} });
               
                 // let uuidResult  = await getUUIDFromAPI({
                 //     theIndex,
@@ -254,10 +258,36 @@
             return uuidResult ;
         }
     }
+    function createTosMessage(){
+ 
+        const ul = document.createElement('ul');
+        ul.classList.add('form-field-errors');
+        ul.dataset.test=  'terms-field-error-message';
+        ul.innerHTML = '<li class="form-field-error"><label aria-live="polite" class="form-inlineMessage" for="terms" id="terms-field-error-message" role="alert">Please agree to the terms and conditions</label></li>';
+        return ul;
+    }
+    function handleTOSAction(){
+        const tosParent = document.getElementById('terms')?.parentNode;
+        document.querySelector('ul.form-field-errors').remove();
+        tosParent.classList.remove('form-field--error');
+        tosParent.removeEventListener('click',handleTOSAction);
+    }
     function handlePlaceOrderButton(e) {
         e.preventDefault(); console.log("Default prevented, Loading status", RocketfuelPaymentEngine.loading); if (RocketfuelPaymentEngine.loading === true)
             return
+        console.log('[ TOS CLICKED ]', document.getElementById('terms').checked );
+const tosParent = document.getElementById('terms')?.parentNode
+        if(document.getElementById('terms') &&  document.getElementById('terms').checked === false && !document.querySelector('ul.form-field-errors')){
+                tosParent.classList.add('form-field--error');
+               
+                tosParent.appendChild(createTosMessage())
+                tosParent.addEventListener('click',handleTOSAction)
+            return;
+        }
+        
+    
         document.getElementById(btnId).innerHTML = 'LOADING...';
+
         RocketfuelPaymentEngine.loading = true; let rkflInterval = setInterval(() => {
             if (document.getElementById('Rocketfuel')) {
                 document.getElementById('Rocketfuel').style.display = 'block'
@@ -280,6 +310,10 @@
             RocketfuelPaymentEngine.loading === false
             console.warn("RKFL HAS BEEN UNSELECTED"); if (document.getElementById(btnId)) { document.getElementById(btnId).style.display = 'none' }
             if (document.getElementById('checkout-payment-continue')) { document.getElementById('checkout-payment-continue').style.visibility = 'inherit' }
+            if(document.querySelector('ul.form-field-errors')){
+                handleTOSAction()
+            }
+          
         }
     }
     const mutateObserver = () => { const targetNode = document.querySelector('.checkout-step--payment'); const config = { attributes: true, childList: true, subtree: true }; const callback = function (mutationsList, observer) { for (const mutation of mutationsList) { if (mutation.type === 'childList') { if (document.getElementById('checkout-payment-continue')) { if (!document.getElementById('checkout-payment-continue').dataset.rkfl) { if (document.getElementById('radio-moneyorder')?.checked === true) { document.getElementById('checkout-payment-continue').dataset.rkfl = 'active' } } } } } }; const observer = new MutationObserver(callback); observer.observe(targetNode, config); }
@@ -289,7 +323,7 @@
                 console.log('We have UUID, no buton disabling and event has been added ')
                 return;
             }
-            if(document.getElementById(btnId).disabled){
+            if(document.getElementById(btnId)){
                 document.getElementById(btnId).disabled = true;
             }
           
@@ -312,7 +346,9 @@
         localStorage.removeItem('merchant_auth_rocketfuel');
         function createPlaceOrderButton() {
             if (document.getElementById(btnId)) { return; }
-            const rfklCheckoutBtnCover = document.createElement('div'); rfklCheckoutBtnCover.classList.add('form-actions'); const rfklCheckoutBtn = document.createElement('div'); rfklCheckoutBtn.id = btnId; rfklCheckoutBtn.disabled = true; rfklCheckoutBtn.style.cssText = 'display:none;background-color:#333;border-color:#333;color:#fff;font-family:Montserrat,Arial,Helvetica,sans-serif;padding:1.1875rem 4.5rem;font-size:1.38462rem;text-align:center;cursor:pointer;margin-left:0;width:100%'; rfklCheckoutBtn.addEventListener('click', handlePlaceOrderButton); rfklCheckoutBtn.innerHTML = btnText; rfklCheckoutBtnCover.appendChild(rfklCheckoutBtn)
+            const rfklCheckoutBtnCover = document.createElement('div'); rfklCheckoutBtnCover.classList.add('form-actions'); const rfklCheckoutBtn = document.createElement('div'); rfklCheckoutBtn.classList.add('button', 'button--action','button--large','button--slab','optimizedCheckout-buttonPrimary'); rfklCheckoutBtn.id = btnId; rfklCheckoutBtn.disabled = true; 
+          
+            rfklCheckoutBtn.addEventListener('click', handlePlaceOrderButton); rfklCheckoutBtn.innerHTML = btnText; rfklCheckoutBtnCover.appendChild(rfklCheckoutBtn)
             const checkoutPayIn = setInterval(() => { if (document.getElementById('checkout-payment-continue')) { document.getElementById('checkout-payment-continue').parentNode.parentNode.insertBefore(rfklCheckoutBtnCover, document.getElementById('checkout-payment-continue').parentNode); clearInterval(checkoutPayIn); } }, 1000);
         }
         let checkPlaceOrder = setInterval(() => {
@@ -329,7 +365,7 @@
                 
                     console.log("Rocketfuel now ready----->");
                 }
-            }, 2000); let formChecklist = setInterval(() => { if (document.querySelector('.form-checklist.optimizedCheckout-form-checklist')) { clearInterval(formChecklist); document.getElementById('checkout-app').addEventListener('click', handleClick, false); } }, 2000)
+            }, 2000); let formChecklist = setInterval(() => { if (document.querySelector('.form-checklist.optimizedCheckout-form-checklist li')) { clearInterval(formChecklist);handleClick({target:document.querySelector('.form-checklist.optimizedCheckout-form-checklist li input')});document.getElementById('checkout-app').addEventListener('click', handleClick, false); } }, 2000)
             let triggerBtn = setInterval(() => {
                 if (document.querySelector('.form-checklist.optimizedCheckout-form-checklist li input#radio-moneyorder')) {
                     mutateObserver(); clearInterval(triggerBtn); if (document.getElementById('radio-moneyorder')?.checked === true) {
@@ -350,7 +386,9 @@
                 const {uuid} = JSON.parse(uuidEmail)
                 const storeHash = await getStoreHash(); let thankyouInter = setInterval(async () => {
                     if (!document.querySelector('p[data-test=order-confirmation-order-status-text]')) return; 
-                    // document.querySelector('p[data-test=order-confirmation-order-status-text]').innerHTML = 'Your order has been received, An email will be sent containing information about your purchase.'; document.querySelector('div[data-test=payment-instructions]').innerHTML = '';
+                    document.querySelector('p[data-test=order-confirmation-order-status-text]').innerHTML = ''; 
+                    // document.querySelector('p[data-test=order-confirmation-order-status-text]').innerHTML = 'Your order has been received, An email will be sent containing information about your purchase.'; 
+                    //document.querySelector('div[data-test=payment-instructions]').innerHTML = '';
                      clearInterval(thankyouInter); try {
                         const temp_orderid_rocketfuel = localStorage.getItem("temp_orderid_rocketfuel"); const order_id = document.querySelector('p[data-test=order-confirmation-order-number-text] strong').innerText; if (!order_id && !temp_orderid_rocketfuel) { return; }
                         var myHeaders = new Headers(); myHeaders.append("Content-Type", "application/json"); myHeaders.append("merchant-auth", merchant_auth_rocketfuel);
@@ -368,4 +406,4 @@
         sortSuccessPage();
     }
 })();
-console.log('v1.0.2')
+console.log('v1.0.3')
