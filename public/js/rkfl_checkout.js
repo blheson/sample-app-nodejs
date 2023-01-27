@@ -317,7 +317,9 @@ const tosParent = document.getElementById('terms')?.parentNode
     }
     const mutateObserver = () => { const targetNode = document.querySelector('.checkout-step--payment'); const config = { attributes: true, childList: true, subtree: true }; const callback = function (mutationsList, observer) { for (const mutation of mutationsList) { if (mutation.type === 'childList') { if (document.getElementById('checkout-payment-continue')) { if (!document.getElementById('checkout-payment-continue').dataset.rkfl) { if (document.getElementById('radio-moneyorder')?.checked === true) { document.getElementById('checkout-payment-continue').dataset.rkfl = 'active' } } } } } }; const observer = new MutationObserver(callback); observer.observe(targetNode, config); }
     function enableButton(status) {
-        if (!document.getElementById('checkout-payment-continue')) return; if (status && document.getElementById('checkout-payment-continue')) { setTimeout(() => { if (RocketfuelPaymentEngine.loading === true) return; document.getElementById(btnId).disabled = false; document.getElementById(btnId).style.display = 'block'; }, 2000) } else {
+        if (!document.getElementById('checkout-payment-continue')) return; if (status && document.getElementById('checkout-payment-continue')) { setTimeout(() => { if (RocketfuelPaymentEngine.loading === true) return; document.getElementById(btnId).disabled = false; document.getElementById(btnId).style.display = 'block'; 
+        document.getElementById('checkout-payment-continue').style.visibility = 'hidden'
+    }, 2000) } else {
             if (RocketfuelPaymentEngine.response.uuid && RocketfuelPaymentEngine.buttonEventAdded === true) {
                 console.log('We have UUID, no buton disabling and event has been added ')
                 return;
