@@ -1,6 +1,5 @@
 (() => {
-    // var serverApiUrl = 'https://bigcommerce.rocketfuelblockchain.com';
-    var serverApiUrl = 'https://4b3e-105-113-16-44.ngrok.io';
+    var serverApiUrl = 'https://bigcommerce.rocketfuelblockchain.com';
     var btnId = 'rkfl-btn-place-order';
     var btnText = 'PLACE ORDER';
     var path = window.location.pathname; let currentPage = path.split('/').pop(); var thisScript = document.currentScript; function paramsToJSON(search) { search = search.substring(1); return JSON.parse('{"' + decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g, '":"') + '"}') }
