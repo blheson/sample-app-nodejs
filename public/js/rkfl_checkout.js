@@ -300,10 +300,11 @@ const tosParent = document.getElementById('terms')?.parentNode
         const excludedIds = ['terms', btnId, 'checkout-payment-continue'];
 
         if (!e.target?.id || excludedIds.includes(e.target.id)) { return }
-        if (e.target.id === 'radio-moneyorder') {
+        if (e.target.id === 'radio-moneyorder' || document.getElementById('radio-moneyorder')?.checked === true) {
             if (!document.getElementById(btnId)) { createPlaceOrderButton() }
-            document.getElementById('checkout-payment-continue').style.visibility = 'hidden'
-            setTimeout(() => { if (document.getElementById('radio-moneyorder')?.checked === true) { document.getElementById(btnId).style.display = 'block' } }, 1000)
+             
+            setTimeout(() => { if (document.getElementById('radio-moneyorder')?.checked === true) { document.getElementById(btnId).style.display = 'block' } }, 1000);
+            
             RocketfuelPaymentEngine.buttonEventAdded = true; console.log("RKFL HAS BEEN SELECTED"); document.getElementById('checkout-payment-continue').style.visibility = 'hidden';
         } else {
             RocketfuelPaymentEngine.loading === false
@@ -366,7 +367,7 @@ const tosParent = document.getElementById('terms')?.parentNode
                 
                     console.log("Rocketfuel now ready----->");
                 }
-            }, 2000); let formChecklist = setInterval(() => { if (document.querySelector('.form-checklist.optimizedCheckout-form-checklist li')) { clearInterval(formChecklist);handleClick({target:document.querySelector('.form-checklist.optimizedCheckout-form-checklist li input')});document.getElementById('checkout-app').addEventListener('click', handleClick, false); } }, 2000)
+            }, 2000); let formChecklist = setInterval(() => { if (document.querySelector('.form-checklist.optimizedCheckout-form-checklist li')) { clearInterval(formChecklist);handleClick({target:document.querySelector('.form-checklist.optimizedCheckout-form-checklist li input')});document.getElementById('.checkout-step--payment ul.form-checklist.optimizedCheckout-form-checklist').addEventListener('click', handleClick, false); } }, 2000)
             let triggerBtn = setInterval(() => {
                 if (document.querySelector('.form-checklist.optimizedCheckout-form-checklist li input#radio-moneyorder')) {
                     mutateObserver(); clearInterval(triggerBtn); if (document.getElementById('radio-moneyorder')?.checked === true) {
@@ -407,4 +408,4 @@ const tosParent = document.getElementById('terms')?.parentNode
         sortSuccessPage();
     }
 })();
-console.log('v1.0.3.2')
+console.log('v1.0.3.3')
