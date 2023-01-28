@@ -347,7 +347,7 @@ const tosParent = document.getElementById('terms')?.parentNode
         localStorage.removeItem('merchant_auth_rocketfuel');
         function createPlaceOrderButton() {
             if (document.getElementById(btnId)) { return; }
-            const rfklCheckoutBtnCover = document.createElement('div'); rfklCheckoutBtnCover.classList.add('form-actions'); const rfklCheckoutBtn = document.createElement('div'); rfklCheckoutBtn.classList.add('button', 'button--action','button--large','button--slab','optimizedCheckout-buttonPrimary'); rfklCheckoutBtn.id = btnId; rfklCheckoutBtn.disabled = true; 
+            const rfklCheckoutBtnCover = document.createElement('div'); rfklCheckoutBtnCover.classList.add('form-actions');const rfklCheckoutBtn = document.createElement('div'); rfklCheckoutBtn.classList.add('button', 'button--action','button--large','button--slab','optimizedCheckout-buttonPrimary'); rfklCheckoutBtn.id = btnId; rfklCheckoutBtn.disabled = true;  rfklCheckoutBtn.style.cssText = 'display:none';
           
             rfklCheckoutBtn.addEventListener('click', handlePlaceOrderButton); rfklCheckoutBtn.innerHTML = btnText; rfklCheckoutBtnCover.appendChild(rfklCheckoutBtn)
             const checkoutPayIn = setInterval(() => { if (document.getElementById('checkout-payment-continue')) { document.getElementById('checkout-payment-continue').parentNode.parentNode.insertBefore(rfklCheckoutBtnCover, document.getElementById('checkout-payment-continue').parentNode); clearInterval(checkoutPayIn); } }, 1000);
@@ -407,4 +407,4 @@ const tosParent = document.getElementById('terms')?.parentNode
         sortSuccessPage();
     }
 })();
-console.log('v1.0.3')
+console.log('v1.0.3.2')
