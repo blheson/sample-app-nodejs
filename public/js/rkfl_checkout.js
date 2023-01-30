@@ -157,7 +157,7 @@
         return { name, 'id': name.toLowerCase(), 'price': amount, 'quantity': '1' }
     }
     function sortIndividual(items) { return items.map(item => { return { 'name': item.name, 'id': item.id.toString(), 'price': item.listPrice, 'quantity': item.quantity.toString() } }) }
-    function sortCart({ cart: cartItems, shipping,tax }) {
+    function sortCart({ cart: cartItems, shipping,tax ,discount}) {
         let customItems = shippingItems = digitalItems = giftCertificates = physicalItems = []; if (cartItems.customItems.length > 0) { customItems = sortIndividual(cartItems.customItems); }
         if (cartItems.digitalItems.length > 0) { digitalItems = sortIndividual(cartItems.digitalItems); }
         if (cartItems.giftCertificates.length > 0) { giftCertificates = sortIndividual(cartItems.giftCertificates); }
@@ -167,6 +167,9 @@
         }
         if (tax?.amount && parseFloat(tax.amount) > 0) {
             taxItems = [sortExtraItem(tax.amount,'Tax')]
+        }
+        if (discount?.amount && parseFloat(discount.amount) < 0) {
+            taxItems = [sortExtraItem(discount.amount,'Discount')]
         }
         return [...customItems, ...digitalItems, ...giftCertificates, ...physicalItems, ...shippingItems,...taxItems]
     }
@@ -195,7 +198,7 @@
 
                 const isPartial = !!tempOrderIdRocketfuel && !!uuidRocketfuel && (theIndex.email === uuidEmail?.email);
 
-                RocketfuelPaymentEngine.user_data.email = theIndex.email; cart = sortCart({ cart: theIndex.lineItems, shipping: { amount: checkoutResult?.shippingCostTotal },tax:{amount:checkoutResult?.taxTotal} });
+                RocketfuelPaymentEngine.user_data.email = theIndex.email; cart = sortCart({ cart: theIndex.lineItems, shipping: { amount: checkoutResult?.shippingCostTotal },tax:{amount:checkoutResult?.taxTotal},discount:{amount:theIndex.discountAmount || 0} });
               
                 // let uuidResult  = await getUUIDFromAPI({
                 //     theIndex,
@@ -304,7 +307,7 @@ const tosParent = document.getElementById('terms')?.parentNode
             if (!document.getElementById(btnId)) { createPlaceOrderButton() }
              
             setTimeout(() => { if (document.getElementById('radio-moneyorder')?.checked === true) { document.getElementById(btnId).style.display = 'block' } }, 1000);
-            
+
             RocketfuelPaymentEngine.buttonEventAdded = true; console.log("RKFL HAS BEEN SELECTED"); document.getElementById('checkout-payment-continue').style.visibility = 'hidden';
         } else {
             RocketfuelPaymentEngine.loading === false
