@@ -411,4 +411,4 @@ const tosParent = document.getElementById('terms')?.parentNode
         sortSuccessPage();
     }
 })();
-console.log('v1.0.3.3')
+console.log('v1.0.3.3.jenkins')
