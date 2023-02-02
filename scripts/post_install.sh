@@ -7,4 +7,5 @@ cd ~/$APPLICATION_NAME
 
 npm install typescript
 npm install
+npm test
 npm run build
