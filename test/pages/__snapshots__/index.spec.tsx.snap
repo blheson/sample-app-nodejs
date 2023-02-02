@@ -7,6 +7,32 @@ exports[`Homepage renders form 1`] = `
   <div
     class="styled__StyledInlineGroup-sc-1a6yr6l-2 jiJxde"
   >
+    <label
+      for=""
+      style="color: rgb(49, 52, 64); font-size: 1rem; font-weight: 600;"
+    >
+      Callback URL:
+    </label>
+    <div
+      style="font-size: 14px;"
+    >
+      You may login to 
+      <a
+        href="https://app.rocketfuelblockchain.com/settings"
+      >
+        Rocketfuel Merchant Settings
+      </a>
+       to update your Callback URL to: 
+      <span
+        style="color: red; font-weight: 600;"
+      >
+        https://bigcommerce.rocketfuelblockchain.com/api/webhook/transaction/
+      </span>
+    </div>
+  </div>
+  <div
+    class="styled__StyledInlineGroup-sc-1a6yr6l-2 jiJxde"
+  >
     <div>
       <label
         class="styled__StyledH4-sc-tqnj75-4 styled__StyledLabel-sc-m3fyue-0 XRfzZ cgVpUS"
@@ -106,11 +132,6 @@ exports[`Homepage renders form 1`] = `
       >
         Public Key
       </label>
-      <p
-        class="styled__StyledSmall-sc-tqnj75-6 gwPtCU"
-      >
-        Public Key.
-      </p>
       <span
         class="styled__StyledTextareaWrapper-sc-c1uos0-0 eavuQn"
       >
